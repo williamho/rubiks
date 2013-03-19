@@ -3,7 +3,7 @@
 
 void createVBO();
 GLuint vao, vbo, ibo;
-GLuint uOffset;
+GLuint uOffset, uCubeNum;
 
 void init() {
 	createVBO();
@@ -12,29 +12,29 @@ void init() {
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
 
+	// Load shaders
 	GLuint program = InitShader("vshader.glsl", "fshader.glsl");
 	glUseProgram(program);
 
+	// Set position and color for single cube
 	size_t colorDataOffset = sizeof(GLfloat) * 3 * VERT_PER_CUBE_UNIQUE;
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 	GLuint vPosition = glGetAttribLocation(program, "vPosition");
 	glEnableVertexAttribArray(vPosition);
 	glVertexAttribPointer(vPosition, 3, GL_FLOAT, GL_FALSE, 0, 0);
-
-	GLuint vColor = glGetAttribLocation(program, "vColor");
-	glEnableVertexAttribArray(vColor);
-	glVertexAttribPointer(vColor, 3, GL_FLOAT, GL_FALSE, 0, (void*)colorDataOffset);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
 	glBindVertexArray(0);
 
+	// Handle depth info
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LEQUAL);
 	glDepthRange(0.0f, 1.0f);
 
     uOffset = glGetUniformLocation(program, "uOffset");
+    uCubeNum = glGetUniformLocation(program, "uCubeNum");
 }
 
 void reshape (int w, int h) {
@@ -47,17 +47,17 @@ void display() {
 
 	glBindVertexArray(vao);
 
-	// Draw 27 cubes
-	for (int x=-1; x<=1; x++) {
-		for (int y=-1; y<=1; y++) {
-			for (int z=-1; z<=1; z++) {
-				glUniform4f(uOffset, x, y, z, 1.0f);
-				glDrawElementsBaseVertex(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0, 0);
-			}
-		}
+	// Draw 27 cubes based on initial cube
+	int x,y,z;
+	for (int i=0; i<27; i++) {
+		x = i/9 - 1;
+		y = (i%9)/3 - 1;
+		z = i%3 - 1;
+
+		glUniform4f(uOffset, x, y, z, 1.0f);
+		glDrawElementsBaseVertex(GL_TRIANGLES, VERT_PER_CUBE, 
+			GL_UNSIGNED_SHORT, 0, 0);
 	}
-	//glUniform4f(uOffset, 0.0f, 0.0f, 0.0f, 1.0f);
-	//glDrawElements(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0);
 
 	glBindVertexArray(0);
 

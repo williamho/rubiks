@@ -23,18 +23,6 @@ void createVBO() {
 		 1, -1, -1,
 	};
 
-	// Colors: Corresponding to the vertices above
-	const GLfloat colorData[] = {
-		0.0, 0.0, 0.0, 
-		1.0, 0.0, 0.0, 
-		1.0, 1.0, 0.0, 
-		0.0, 1.0, 0.0, 
-		0.0, 0.0, 1.0, 
-		1.0, 0.0, 1.0, 
-		1.0, 1.0, 1.0, 
-		0.0, 1.0, 1.0, 
-	};
-
 	// Indices of points corresponding to each face of the cube
 	const int faces[6][4] = {
 		{1, 0, 3, 2},
@@ -62,9 +50,7 @@ void createVBO() {
 	// Vertex Buffer Object
 	glGenBuffers(1, &vbo);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData)+sizeof(colorData), NULL, GL_STATIC_DRAW);
-	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertexData), vertexData);
-	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertexData), sizeof(colorData), colorData);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData), vertexData, GL_STATIC_DRAW);
 
 	// Index Buffer Object
 	glGenBuffers(1, &ibo);
