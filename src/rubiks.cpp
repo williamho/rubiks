@@ -1,11 +1,9 @@
-#include "Angel.h"
-
-#define WIN_WIDTH  640
-#define WIN_HEIGHT 640
-#define VERT_PER_CUBE 36
+#include <Angel.h>
+#include "rubiks.h"
 
 void createVBO();
 GLuint vao, vbo, ibo;
+GLuint uOffset;
 
 void init() {
 	createVBO();
@@ -17,7 +15,7 @@ void init() {
 	GLuint program = InitShader("vshader.glsl", "fshader.glsl");
 	glUseProgram(program);
 
-	size_t colorDataOffset = sizeof(GLfloat) * 3 * VERT_PER_CUBE;
+	size_t colorDataOffset = sizeof(GLfloat) * 3 * VERT_PER_CUBE_UNIQUE;
 	glBindBuffer(GL_ARRAY_BUFFER, vbo);
 
 	GLuint vPosition = glGetAttribLocation(program, "vPosition");
@@ -35,6 +33,8 @@ void init() {
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LEQUAL);
 	glDepthRange(0.0f, 1.0f);
+
+    uOffset = glGetUniformLocation(program, "uOffset");
 }
 
 void reshape (int w, int h) {
@@ -47,9 +47,17 @@ void display() {
 
 	glBindVertexArray(vao);
 
-	glDrawElements(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0);
-
-	//glDrawElementsBaseVertex(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0, VERT_PER_CUBE);
+	// Draw 27 cubes
+	for (int x=-1; x<=1; x++) {
+		for (int y=-1; y<=1; y++) {
+			for (int z=-1; z<=1; z++) {
+				glUniform4f(uOffset, x, y, z, 1.0f);
+				glDrawElementsBaseVertex(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0, 0);
+			}
+		}
+	}
+	//glUniform4f(uOffset, 0.0f, 0.0f, 0.0f, 1.0f);
+	//glDrawElements(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0);
 
 	glBindVertexArray(0);
 

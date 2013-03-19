@@ -1,5 +1,5 @@
-#include "Angel.h"
-#define VERT_PER_CUBE 36
+#include <Angel.h>
+#include "rubiks.h"
 
 extern GLuint vbo, ibo;
 void createVBO() {
@@ -20,7 +20,7 @@ void createVBO() {
 		-1, -1, -1,
 		-1,  1, -1,
 		 1,  1, -1,
-		 1, -1, -1
+		 1, -1, -1,
 	};
 
 	// Colors: Corresponding to the vertices above
@@ -48,9 +48,9 @@ void createVBO() {
 	// Set up array with index information
 	GLshort indexData[VERT_PER_CUBE];
 
-	#define SET_CUBE_DATA(v) indexData[index++] = faces[q][v];
+	#define SET_CUBE_DATA(v) indexData[index++] = faces[f][v];
 	int index = 0;
-	for (int q=0; q<6; q++) {
+	for (int f=0; f<6; f++) {
 		SET_CUBE_DATA(0);
 		SET_CUBE_DATA(1);
 		SET_CUBE_DATA(2);
@@ -65,12 +65,10 @@ void createVBO() {
 	glBufferData(GL_ARRAY_BUFFER, sizeof(vertexData)+sizeof(colorData), NULL, GL_STATIC_DRAW);
 	glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(vertexData), vertexData);
 	glBufferSubData(GL_ARRAY_BUFFER, sizeof(vertexData), sizeof(colorData), colorData);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
 
 	// Index Buffer Object
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STATIC_DRAW);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 }
 

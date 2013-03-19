@@ -1,11 +1,13 @@
 #version 150
 
-in  vec4 vPosition;
-in  vec4 vColor;
+in vec4 vPosition;
+in vec4 vColor;
+uniform vec4 uOffset;
 out vec4 color;
 
 void main() {
-	vPosition.xyz *= 0.5;
+	vPosition += uOffset*2.1;
+	vPosition.xyz *= 0.25;
 
 	vec3 theta = vec3(45,45,45);
 	vec3 angles = radians(theta);
