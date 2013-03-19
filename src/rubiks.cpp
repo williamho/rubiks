@@ -3,7 +3,7 @@
 
 void createVBO();
 GLuint vao, vbo, ibo;
-GLuint uOffset, uCubeNum;
+GLuint uCubeNum;
 
 void init() {
 	createVBO();
@@ -33,7 +33,6 @@ void init() {
 	glDepthFunc(GL_LEQUAL);
 	glDepthRange(0.0f, 1.0f);
 
-    uOffset = glGetUniformLocation(program, "uOffset");
     uCubeNum = glGetUniformLocation(program, "uCubeNum");
 }
 
@@ -48,13 +47,8 @@ void display() {
 	glBindVertexArray(vao);
 
 	// Draw 27 cubes based on initial cube
-	int x,y,z;
 	for (int i=0; i<27; i++) {
-		x = i/9 - 1;
-		y = (i%9)/3 - 1;
-		z = i%3 - 1;
-
-		glUniform4f(uOffset, x, y, z, 1.0f);
+		glUniform1i(uCubeNum,i);
 		glDrawElementsBaseVertex(GL_TRIANGLES, VERT_PER_CUBE, 
 			GL_UNSIGNED_SHORT, 0, 0);
 	}

@@ -1,50 +1,81 @@
 #version 150
 
 in vec4 vPosition;
-in vec4 vColor;
-uniform vec4 uOffset;
-uniform uint uCubeNum;
+uniform int uCubeNum;
 out vec4 color;
 
 vec4 getColor() {
+	/*   5-------6
+	    /|      /|      y
+	   1-------2 |      |/
+	   | |     | |    --+--x
+	   | 4-----|-7     /|
+	   |/      |/     z
+	   0-------3             */
+
+	int face[9] = int[9](0,0,0,0,0,0,0,0,0);
+	if (uCubeNum%3 == 0) // Left face
+		face[0] = 1;
+	if (uCubeNum%9 < 3) // Front face
+		face[1] = 1;
+	
+
 	switch(gl_VertexID) {
 	case 0:
-		return vec4(0,0,0,1);
+		if (face[0] > 0)
+			return vec4(0,0,1,1);
+		if (face[1] > 0)
+			return vec4(1,0,0,1);
 		break;
 	case 1:
-		return vec4(0,0,1,1);
+		if (face[0] > 0)
+			return vec4(0,0,1,1);
+		if (face[1] > 0)
+			return vec4(1,0,0,1);
 		break;
 	case 2:
-		return vec4(0,1,0,1);
+		if (face[1] > 0)
+			return vec4(1,0,0,1);
 		break;
 	case 3:
-		return vec4(0,1,1,1);
+		if (face[1] > 0)
+			return vec4(1,0,0,1);
 		break;
 	case 4:
-		return vec4(1,0,0,1);
+		if (face[0] > 0)
+			return vec4(0,0,1,1);
 		break;
 	case 5:
-		return vec4(1,0,1,1);
+		if (face[0] > 0)
+			return vec4(0,0,1,1);
 		break;
 	case 6:
-		return vec4(1,1,0,1);
 		break;
 	case 7:
-		return vec4(1,1,1,1);
 		break;
 	}
+	return vec4(0,0,0,1);
 }
 
 void main() {
-	vPosition += uOffset*2.1;
-	vPosition.xyz *= 0.25;
+	// Position the cube based on uCubeNum
+	int x = uCubeNum%3 - 1;
+	int y = (uCubeNum%9)/3 - 1;
+	int z = uCubeNum/9 - 1;
+	vec4 cubeOffset = vec4(x, y, z, 1.0);
 
+	vPosition += cubeOffset*2.1;
+
+	// Temporary scaling by constant factor
+	// TODO: replace with a uniform
+	vPosition.xyz *= 0.25;
 	vec3 theta = vec3(45,45,45);
+
 	vec3 angles = radians(theta);
 	vec3 c = cos(angles);
 	vec3 s = sin(angles);
 
-	// Remeber: these matrices are column-major
+	// Remember: these matrices are column-major
 	mat4 rx = mat4( 
 		1.0,  0.0,  0.0, 0.0,
 		0.0,  c.x,  s.x, 0.0,
