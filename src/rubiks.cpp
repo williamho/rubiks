@@ -1,10 +1,11 @@
 #include <Angel.h>
 #include "rubiks.h"
-#include "trackball.h"
 
 GLuint vao, vbo, ibo;
-GLuint uTheta;
-vec3 theta = vec3(45.0, 45.0, 45.0);
+GLuint uRotation;
+vec2 mousePosPrev;
+mat4 rotation;
+bool rightMousePressed;
 
 int winWidth = 640, winHeight = 640;
 
@@ -35,7 +36,7 @@ void init() {
 	glDepthFunc(GL_LEQUAL);
 	glDepthRange(0.0f, 1.0f);
 
-	uTheta = glGetUniformLocation(program, "theta");
+	uRotation = glGetUniformLocation(program, "rotation");
 }
 
 void reshape (int w, int h) {
@@ -52,11 +53,7 @@ void display() {
 	glBindVertexArray(vao);
 
 	// Draw 27 cubes based on initial cube. Function available in OpenGL 3.1.
-	for (int i=0; i<3; i++) {
-		if (theta[i] > 360)
-			theta[i] -= 360;
-	}
-	glUniform3fv(uTheta, 1, theta);
+	glUniformMatrix4fv(uRotation, 1, 0, rotation);
 	glDrawElementsInstanced(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0, NUM_CUBES);
 
 	glBindVertexArray(0);
@@ -77,22 +74,29 @@ void mouseButton(int button, int state, int x, int y) {
 	if(button == GLUT_RIGHT_BUTTON) {
 		switch(state) {
 		case GLUT_DOWN:
-			trackingMouse = true;
-			lastPos = getTrackballPos(x, y, winWidth, winHeight);
+			mousePosPrev = vec2(x,y);
+			rightMousePressed = true;
 			break;
 		case GLUT_UP:
-			trackingMouse = false;
+			rightMousePressed = false;
 			break;
 		}
 	}
 }
 
+void mouseMotion(int x, int y) {
+	vec2 mousePos = vec2(x,y);
+	if(rightMousePressed) {
+		vec2 d = mousePos - mousePosPrev;
+		d *= ROTATION_FACTOR;
+		rotation *= RotateY(d[0]);
+		rotation *= RotateX(d[1]);
+		mousePosPrev = mousePos;
+	} 
+}
+
 void idle() {
 	static char windowTitle[20]; 
-
-	//theta[0] += 0.1;
-	//if (theta[0] > 360)
-		//theta[0] -= 360;
 
 	sprintf(windowTitle, "%.1f", calculateFPS());
 	glutSetWindowTitle(windowTitle);
@@ -117,8 +121,11 @@ int main(int argc, char *argv[]) {
 	glutMotionFunc(mouseMotion);
 	glutIdleFunc(idle);
 
-	glMatrixMode(GL_MODELVIEW);
-	glLoadIdentity();
+	rotation = mat4(); // Identity
+	vec3 r(INITIAL_ROTATION);
+	rotation *= RotateX(r[0]);
+	rotation *= RotateY(r[1]);
+	rotation *= RotateZ(-r[2]);
 
 	glutMainLoop();
 	return 0;

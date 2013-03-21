@@ -2,7 +2,7 @@
 
 in vec4 vPosition;
 out vec4 color;
-uniform vec3 theta;
+uniform mat4 rotation;
 
 vec4 getColor(vec4 cubeOffset) {
 	/*   5-------6
@@ -43,40 +43,7 @@ void main() {
 	// TODO: replace with a uniform
 	vPosition.xyz /= 2;
 
-	vec3 angles = radians(theta);
-	vec3 c = cos(angles);
-	vec3 s = sin(angles);
-
-	// Remember: these matrices are column-major
-	mat4 rx = mat4( 
-		1.0,  0.0,  0.0, 0.0,
-		0.0,  c.x,  s.x, 0.0,
-		0.0, -s.x,  c.x, 0.0,
-		0.0,  0.0,  0.0, 1.0 
-	);
-
-	mat4 ry = mat4( 
-		c.y, 0.0, -s.y, 0.0,
-		0.0, 1.0,  0.0, 0.0,
-		s.y, 0.0,  c.y, 0.0,
-		0.0, 0.0,  0.0, 1.0 
-	);
-
-	// Workaround for bug in ATI driver
-	ry[1][0] = 0.0;
-	ry[1][1] = 1.0;
-
-	mat4 rz = mat4( 
-		c.z, -s.z, 0.0, 0.0,
-		s.z,  c.z, 0.0, 0.0,
-		0.0,  0.0, 1.0, 0.0,
-		0.0,  0.0, 0.0, 1.0 
-	);
-
-	// Workaround for bug in ATI driver
-	rz[2][2] = 1.0;
-
 	color = getColor(cubeOffset);
-	gl_Position = rz * ry * rx * vPosition;
+	gl_Position = rotation * vPosition;
 } 
 
