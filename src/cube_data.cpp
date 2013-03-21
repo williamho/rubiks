@@ -29,11 +29,11 @@ void createVBO() {
 	// Vertices of the cube centered around the origin, one face per line
 	const GLfloat vertexData[] = {
 		CUBE_P4, CUBE_P0, CUBE_P1, CUBE_P5,    
-		CUBE_P7, CUBE_P3, CUBE_P2, CUBE_P6,    
-		CUBE_P4, CUBE_P0, CUBE_P3, CUBE_P7,    
+		CUBE_P7, CUBE_P6, CUBE_P2, CUBE_P3,
+		CUBE_P4, CUBE_P7, CUBE_P3, CUBE_P0,
 		CUBE_P5, CUBE_P1, CUBE_P2, CUBE_P6,    
 		CUBE_P4, CUBE_P5, CUBE_P6, CUBE_P7,    
-		CUBE_P0, CUBE_P1, CUBE_P2, CUBE_P3,    
+		CUBE_P1, CUBE_P0, CUBE_P3, CUBE_P2,
 	};
 
 	const GLshort indexData[] = {

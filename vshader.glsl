@@ -2,6 +2,7 @@
 
 in vec4 vPosition;
 out vec4 color;
+uniform vec3 theta;
 
 vec4 getColor(vec4 cubeOffset) {
 	/*   5-------6
@@ -12,17 +13,16 @@ vec4 getColor(vec4 cubeOffset) {
 	   |/      |/     z
 	   0-------3             */
 
-	vec4 faceColors[6] = {
-		vec4(1.0, 0.5, 0.0, 1.0), // Orange
-		vec4(1.0, 0.0, 0.0, 1.0), // Red
-		vec4(0.0, 1.0, 0.0, 1.0), // Green
-		vec4(0.0, 0.0, 1.0, 1.0), // Blue
-		vec4(1.0, 1.0, 0.0, 1.0), // Yellow
-		vec4(1.0, 1.0, 1.0, 1.0), // White
+	const vec4 faceColors[6] = {
+		vec4(1.0, 0.5, 0.0, 1.0), // Left   (-x) Orange
+		vec4(1.0, 0.0, 0.0, 1.0), // Right  (+x) Red
+		vec4(0.0, 1.0, 0.0, 1.0), // Bottom (-y) Green
+		vec4(1.0, 1.0, 0.0, 1.0), // Top    (+y) Yellow
+		vec4(0.0, 0.0, 1.0, 1.0), // Back   (-z) Blue
+		vec4(1.0, 1.0, 1.0, 1.0), // Front  (+z) White
 	};
 
 	// Determine which face of the Rubik's cube this sub-cube is part of
-	int face[6] = int[6](0,0,0,0,0,0);
 	for (int i=0; i<6; i++) {
 		if (cubeOffset[i/2] == i%2*2-1 && gl_VertexID/4 == i)
 			return faceColors[i];
@@ -41,8 +41,7 @@ void main() {
 
 	// Temporary scaling by constant factor
 	// TODO: replace with a uniform
-	vPosition.xyz *= 0.25;
-	vec3 theta = vec3(45,45,45);
+	vPosition.xyz /= 2;
 
 	vec3 angles = radians(theta);
 	vec3 c = cos(angles);
@@ -77,7 +76,6 @@ void main() {
 	// Workaround for bug in ATI driver
 	rz[2][2] = 1.0;
 
-	//color = vColor;
 	color = getColor(cubeOffset);
 	gl_Position = rz * ry * rx * vPosition;
 } 
