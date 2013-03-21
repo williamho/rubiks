@@ -1,9 +1,12 @@
 #include <Angel.h>
 #include "rubiks.h"
+#include "trackball.h"
 
 GLuint vao, vbo, ibo;
 GLuint uTheta;
-GLfloat theta[] = {45.0, 45.0, 45.0};
+vec3 theta = vec3(45.0, 45.0, 45.0);
+
+int winWidth = 640, winHeight = 640;
 
 void init() {
 	createVBO();
@@ -36,6 +39,9 @@ void init() {
 }
 
 void reshape (int w, int h) {
+	glViewport(0, 0, w, h);
+	winWidth = w;
+	winHeight = h;
 }
 
 void display() {
@@ -46,6 +52,10 @@ void display() {
 	glBindVertexArray(vao);
 
 	// Draw 27 cubes based on initial cube. Function available in OpenGL 3.1.
+	for (int i=0; i<3; i++) {
+		if (theta[i] > 360)
+			theta[i] -= 360;
+	}
 	glUniform3fv(uTheta, 1, theta);
 	glDrawElementsInstanced(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0, NUM_CUBES);
 
@@ -63,15 +73,26 @@ void keyboard(unsigned char key, int x, int y) {
 	}
 }
 
-void mouse(int button, int state, int x, int y) {
+void mouseButton(int button, int state, int x, int y) {
+	if(button == GLUT_RIGHT_BUTTON) {
+		switch(state) {
+		case GLUT_DOWN:
+			trackingMouse = true;
+			lastPos = getTrackballPos(x, y, winWidth, winHeight);
+			break;
+		case GLUT_UP:
+			trackingMouse = false;
+			break;
+		}
+	}
 }
 
 void idle() {
 	static char windowTitle[20]; 
 
-	theta[0] += 0.1;
-	if (theta[0] > 360)
-		theta[0] -= 360;
+	//theta[0] += 0.1;
+	//if (theta[0] > 360)
+		//theta[0] -= 360;
 
 	sprintf(windowTitle, "%.1f", calculateFPS());
 	glutSetWindowTitle(windowTitle);
@@ -82,7 +103,7 @@ void idle() {
 int main(int argc, char *argv[]) {
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
-	glutInitWindowSize(WIN_WIDTH, WIN_HEIGHT);
+	glutInitWindowSize(winWidth, winHeight);
 	glutInitContextVersion(3, 2);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutCreateWindow("Rubik's Cube");
@@ -92,8 +113,12 @@ int main(int argc, char *argv[]) {
 
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
-	glutMouseFunc(mouse);
+	glutMouseFunc(mouseButton);
+	glutMotionFunc(mouseMotion);
 	glutIdleFunc(idle);
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
 
 	glutMainLoop();
 	return 0;
