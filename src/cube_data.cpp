@@ -1,51 +1,49 @@
 #include <Angel.h>
 #include "rubiks.h"
 
+// Use a bunch of macros to define a single cube
+/*    5-------6
+	 /|      /|      y
+	1-------2 |      |/
+	| |     | |    --+--x
+	| 4-----|-7     /|
+	|/      |/     z
+	0-------3             */
+#define CUBE_P0  -0.5, -0.5,  0.5,  1.0
+#define CUBE_P1  -0.5,  0.5,  0.5,  1.0
+#define CUBE_P2   0.5,  0.5,  0.5,  1.0
+#define CUBE_P3   0.5, -0.5,  0.5,  1.0
+#define CUBE_P4  -0.5, -0.5, -0.5,  1.0
+#define CUBE_P5  -0.5,  0.5, -0.5,  1.0
+#define CUBE_P6   0.5,  0.5, -0.5,  1.0
+#define CUBE_P7   0.5, -0.5, -0.5,  1.0
+
+// Define the vertex order required to create two triangles to form a quad
+#define QUAD(a,b,c,d) a,b,c, a,c,d
+
+// Define a numbered cube face based on squares (quads, above) and indices
+#define CUBE_FACE(n) QUAD(4*n, 4*n+1, 4*n+2, 4*n+3)
+
 extern GLuint vbo, ibo;
 void createVBO() {
-	/*   5-------6
-	    /|      /|      y
-	   1-------2 |      |/
-	   | |     | |    --+--x
-	   | 4-----|-7     /|
-	   |/      |/     z
-	   0-------3             */
-
 	// Vertices of the cube centered around the origin, one face per line
 	const GLfloat vertexData[] = {
-		-1, -1,  1,
-		-1,  1,  1,
-		 1,  1,  1,
-		 1, -1,  1,
-		-1, -1, -1,
-		-1,  1, -1,
-		 1,  1, -1,
-		 1, -1, -1,
+		CUBE_P4, CUBE_P0, CUBE_P1, CUBE_P5,    
+		CUBE_P7, CUBE_P3, CUBE_P2, CUBE_P6,    
+		CUBE_P4, CUBE_P0, CUBE_P3, CUBE_P7,    
+		CUBE_P5, CUBE_P1, CUBE_P2, CUBE_P6,    
+		CUBE_P4, CUBE_P5, CUBE_P6, CUBE_P7,    
+		CUBE_P0, CUBE_P1, CUBE_P2, CUBE_P3,    
 	};
 
-	// Indices of points corresponding to each face of the cube
-	const int faces[6][4] = {
-		{1, 0, 3, 2},
-		{2, 3, 7, 6},
-		{3, 0, 4, 7},
-		{6, 5, 1, 2},
-		{4, 5, 6, 7},
-		{5, 4, 0, 1},
+	const GLshort indexData[] = {
+		CUBE_FACE(0),  // Left   (-x)
+		CUBE_FACE(1),  // Right  (+x)
+		CUBE_FACE(2),  // Bottom (-y)
+		CUBE_FACE(3),  // Top    (+y)
+		CUBE_FACE(4),  // Back   (-z)
+		CUBE_FACE(5),  // Front  (+z)
 	};
-
-	// Set up array with index information
-	GLshort indexData[VERT_PER_CUBE];
-
-	#define SET_CUBE_DATA(v) indexData[index++] = faces[f][v];
-	int index = 0;
-	for (int f=0; f<6; f++) {
-		SET_CUBE_DATA(0);
-		SET_CUBE_DATA(1);
-		SET_CUBE_DATA(2);
-		SET_CUBE_DATA(0);
-		SET_CUBE_DATA(2);
-		SET_CUBE_DATA(3);
-	}
 
 	// Vertex Buffer Object
 	glGenBuffers(1, &vbo);

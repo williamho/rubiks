@@ -1,10 +1,9 @@
 #version 150
 
 in vec4 vPosition;
-uniform int uCubeNum;
 out vec4 color;
 
-vec4 getColor() {
+vec4 getColor(vec4 cubeOffset) {
 	/*   5-------6
 	    /|      /|      y
 	   1-------2 |      |/
@@ -13,58 +12,32 @@ vec4 getColor() {
 	   |/      |/     z
 	   0-------3             */
 
-	int face[9] = int[9](0,0,0,0,0,0,0,0,0);
-	if (uCubeNum%3 == 0) // Left face
-		face[0] = 1;
-	if (uCubeNum%9 < 3) // Front face
-		face[1] = 1;
-	
+	vec4 faceColors[6] = {
+		vec4(1.0, 0.5, 0.0, 1.0), // Orange
+		vec4(1.0, 0.0, 0.0, 1.0), // Red
+		vec4(0.0, 1.0, 0.0, 1.0), // Green
+		vec4(0.0, 0.0, 1.0, 1.0), // Blue
+		vec4(1.0, 1.0, 0.0, 1.0), // Yellow
+		vec4(1.0, 1.0, 1.0, 1.0), // White
+	};
 
-	switch(gl_VertexID) {
-	case 0:
-		if (face[0] > 0)
-			return vec4(0,0,1,1);
-		if (face[1] > 0)
-			return vec4(1,0,0,1);
-		break;
-	case 1:
-		if (face[0] > 0)
-			return vec4(0,0,1,1);
-		if (face[1] > 0)
-			return vec4(1,0,0,1);
-		break;
-	case 2:
-		if (face[1] > 0)
-			return vec4(1,0,0,1);
-		break;
-	case 3:
-		if (face[1] > 0)
-			return vec4(1,0,0,1);
-		break;
-	case 4:
-		if (face[0] > 0)
-			return vec4(0,0,1,1);
-		break;
-	case 5:
-		if (face[0] > 0)
-			return vec4(0,0,1,1);
-		break;
-	case 6:
-		break;
-	case 7:
-		break;
+	// Determine which face of the Rubik's cube this sub-cube is part of
+	int face[6] = int[6](0,0,0,0,0,0);
+	for (int i=0; i<6; i++) {
+		if (cubeOffset[i/2] == i%2*2-1 && gl_VertexID/4 == i)
+			return faceColors[i];
 	}
-	return vec4(0,0,0,1);
+	return vec4(0.0, 0.0, 0.0, 1.0);
 }
 
 void main() {
-	// Position the cube based on uCubeNum
-	int x = uCubeNum%3 - 1;
-	int y = (uCubeNum%9)/3 - 1;
-	int z = uCubeNum/9 - 1;
+	// Position the cube based on gl_InstanceID
+	int x = gl_InstanceID%3 - 1;
+	int y = (gl_InstanceID%9)/3 - 1;
+	int z = gl_InstanceID/9 - 1;
 	vec4 cubeOffset = vec4(x, y, z, 1.0);
 
-	vPosition += cubeOffset*2.1;
+	vPosition += cubeOffset*1.1;
 
 	// Temporary scaling by constant factor
 	// TODO: replace with a uniform
@@ -105,7 +78,7 @@ void main() {
 	rz[2][2] = 1.0;
 
 	//color = vColor;
-	color = getColor();
+	color = getColor(cubeOffset);
 	gl_Position = rz * ry * rx * vPosition;
 } 
 
