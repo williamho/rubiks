@@ -2,8 +2,9 @@
 #include "rubiks.h"
 
 GLuint vao, vbo, ibo;
-GLuint uRotation;
+GLuint uRotation, uScale;
 vec2 mousePosPrev;
+GLfloat scale = INITIAL_SCALE;
 mat4 rotation;
 bool rightMousePressed;
 
@@ -37,6 +38,7 @@ void init() {
 	glDepthRange(0.0f, 1.0f);
 
 	uRotation = glGetUniformLocation(program, "rotation");
+	uScale = glGetUniformLocation(program, "scale");
 }
 
 void reshape (int w, int h) {
@@ -52,8 +54,9 @@ void display() {
 
 	glBindVertexArray(vao);
 
-	// Draw 27 cubes based on initial cube. Function available in OpenGL 3.1.
+	// Set uniform variables and draw 27 cubes based on initial cube
 	glUniformMatrix4fv(uRotation, 1, 0, rotation);
+	glUniform1f(uScale,scale);
 	glDrawElementsInstanced(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0, NUM_CUBES);
 
 	glBindVertexArray(0);
@@ -71,6 +74,7 @@ void keyboard(unsigned char key, int x, int y) {
 }
 
 void mouseButton(int button, int state, int x, int y) {
+	// Rotate scene with right mouse 
 	if(button == GLUT_RIGHT_BUTTON) {
 		switch(state) {
 		case GLUT_DOWN:
@@ -82,10 +86,19 @@ void mouseButton(int button, int state, int x, int y) {
 			break;
 		}
 	}
+	// Zoom with scroll wheel
+	else if (button == 3 || button == 4) { 
+		if (state == GLUT_UP) // Disregard redundant GLUT_UP events
+			return;
+		scale += (button == 3 ? 1 : -1) * SCALE_FACTOR; // UP to zoom in
+		if (scale < MIN_SCALE) scale = MIN_SCALE;
+		if (scale > MAX_SCALE) scale = MAX_SCALE;
+	}
 }
 
 void mouseMotion(int x, int y) {
 	vec2 mousePos = vec2(x,y);
+	// If right mouse pressed, changes in mouse position will rotate scene
 	if(rightMousePressed) {
 		vec2 d = mousePos - mousePosPrev;
 		d *= ROTATION_FACTOR;
@@ -96,8 +109,8 @@ void mouseMotion(int x, int y) {
 }
 
 void idle() {
+	// DEBUG: Display framerate in window title
 	static char windowTitle[20]; 
-
 	sprintf(windowTitle, "%.1f", calculateFPS());
 	glutSetWindowTitle(windowTitle);
 
@@ -105,6 +118,7 @@ void idle() {
 }
 
 int main(int argc, char *argv[]) {
+	// Initialize window 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(winWidth, winHeight);
@@ -115,13 +129,15 @@ int main(int argc, char *argv[]) {
 	glewInit();
 	init();
 
+	// Register callback functions
 	glutDisplayFunc(display);
 	glutKeyboardFunc(keyboard);
 	glutMouseFunc(mouseButton);
 	glutMotionFunc(mouseMotion);
 	glutIdleFunc(idle);
 
-	rotation = mat4(); // Identity
+	// Set up rotation matrix for entire scene
+	rotation = mat4();
 	vec3 r(INITIAL_ROTATION);
 	rotation *= RotateX(r[0]);
 	rotation *= RotateY(r[1]);

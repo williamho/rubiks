@@ -3,6 +3,7 @@
 in vec4 vPosition;
 out vec4 color;
 uniform mat4 rotation;
+uniform float scale;
 
 vec4 getColor(vec4 cubeOffset) {
 	/*   5-------6
@@ -37,11 +38,8 @@ void main() {
 	int z = gl_InstanceID/9 - 1;
 	vec4 cubeOffset = vec4(x, y, z, 1.0);
 
-	vPosition += cubeOffset*1.1;
-
-	// Temporary scaling by constant factor
-	// TODO: replace with a uniform
-	vPosition.xyz /= 2;
+	vPosition += cubeOffset*1.05;
+	vPosition.xyz *= scale;
 
 	color = getColor(cubeOffset);
 	gl_Position = rotation * vPosition;
