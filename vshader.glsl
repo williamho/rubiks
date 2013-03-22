@@ -2,18 +2,14 @@
 
 in vec4 vPosition;
 out vec4 color;
-uniform mat4 rotation;
+uniform mat4 rotationMat;
 uniform float scale;
+uniform float progress;
+
+uniform int rotations[27];
+uniform int rotationsPrev[27];
 
 vec4 getColor(vec4 cubeOffset) {
-	/*   5-------6
-	    /|      /|      y
-	   1-------2 |      |/
-	   | |     | |    --+--x
-	   | 4-----|-7     /|
-	   |/      |/     z
-	   0-------3             */
-
 	const vec4 faceColors[6] = {
 		vec4(1.0, 0.5, 0.0, 1.0), // Left   (-x) Orange
 		vec4(1.0, 0.0, 0.0, 1.0), // Right  (+x) Red
@@ -31,6 +27,58 @@ vec4 getColor(vec4 cubeOffset) {
 	return vec4(0.0, 0.0, 0.0, 1.0);
 }
 
+mat4 getRotation() {
+	int packed = rotations[gl_InstanceID];
+	int packedPrev = rotationsPrev[gl_InstanceID];
+	vec3 radiansPrev = radians( 
+		90 * vec3(
+			packedPrev & 3,
+			(packedPrev >> 2) & 3,
+			(packedPrev >> 4) & 3
+		)
+	);
+	vec3 radiansNext = radians(
+		90 * vec3(
+			packed & 3,
+			(packed >> 2) & 3,
+			(packed >> 4) & 3
+		)
+	);
+	vec3 radiansCurr = mix(radiansPrev, radiansNext, progress);
+	/*vec3 radiansCurr = radiansNext;*/
+
+	vec3 c = cos(radiansCurr);
+	vec3 s = sin(radiansCurr);
+
+	mat4 rx = mat4( 
+		1.0,  0.0,  0.0, 0.0,
+		0.0,  c.x,  s.x, 0.0,
+		0.0, -s.x,  c.x, 0.0,
+		0.0,  0.0,  0.0, 1.0 
+	);
+
+	mat4 ry = mat4( 
+		c.y, 0.0, -s.y, 0.0,
+		0.0, 1.0,  0.0, 0.0,
+		s.y, 0.0,  c.y, 0.0,
+		0.0, 0.0,  0.0, 1.0 
+	);
+
+	mat4 rz = mat4( 
+		c.z, -s.z, 0.0, 0.0,
+		s.z,  c.z, 0.0, 0.0,
+		0.0,  0.0, 1.0, 0.0,
+		0.0,  0.0, 0.0, 1.0 
+	);
+
+	// Workaround for bug in ATI driver
+	ry[1][0] = 0.0;
+	ry[1][1] = 1.0;
+	rz[2][2] = 1.0;
+
+	return rz * ry * rx;
+}
+
 void main() {
 	// Position the cube based on gl_InstanceID
 	int x = gl_InstanceID%3 - 1;
@@ -42,6 +90,6 @@ void main() {
 	vPosition.xyz *= scale;
 
 	color = getColor(cubeOffset);
-	gl_Position = rotation * vPosition;
+	gl_Position = rotationMat * getRotation() * vPosition;
 } 
 

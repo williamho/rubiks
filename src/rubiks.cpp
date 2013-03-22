@@ -2,12 +2,16 @@
 #include "rubiks.h"
 
 GLuint vao, vbo, ibo;
-GLuint uRotation, uScale;
-vec2 mousePosPrev;
+GLuint uRotationMat, uScale, uRotations, uRotationsPrev, uProgress;
+mat4 rotationMat;
 GLfloat scale = INITIAL_SCALE;
-mat4 rotation;
-bool rightMousePressed;
+GLint rotations[NUM_CUBES];
+GLint rotationsPrev[NUM_CUBES];
+int positions[NUM_CUBES];
+GLfloat progress;
 
+vec2 mousePosPrev;
+bool rightMousePressed;
 int winWidth = 640, winHeight = 640;
 
 void init() {
@@ -37,8 +41,11 @@ void init() {
 	glDepthFunc(GL_LEQUAL);
 	glDepthRange(0.0f, 1.0f);
 
-	uRotation = glGetUniformLocation(program, "rotation");
+	uRotationMat = glGetUniformLocation(program, "rotationMat");
 	uScale = glGetUniformLocation(program, "scale");
+	uRotations = glGetUniformLocation(program, "rotations");
+	uRotationsPrev = glGetUniformLocation(program, "rotationsPrev");
+	uProgress = glGetUniformLocation(program, "progress");
 }
 
 void reshape (int w, int h) {
@@ -55,8 +62,17 @@ void display() {
 	glBindVertexArray(vao);
 
 	// Set uniform variables and draw 27 cubes based on initial cube
-	glUniformMatrix4fv(uRotation, 1, 0, rotation);
+	glUniformMatrix4fv(uRotationMat, 1, 0, rotationMat);
 	glUniform1f(uScale,scale);
+
+	// DEBUG
+	progress += 0.001;
+	if (progress > 1)
+		progress = 0;
+
+	glUniform1f(uProgress,progress);
+	glUniform1iv(uRotations,NUM_CUBES,rotations);
+	glUniform1iv(uRotationsPrev,NUM_CUBES,rotationsPrev);
 	glDrawElementsInstanced(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0, NUM_CUBES);
 
 	glBindVertexArray(0);
@@ -102,8 +118,8 @@ void mouseMotion(int x, int y) {
 	if(rightMousePressed) {
 		vec2 d = mousePos - mousePosPrev;
 		d *= ROTATION_FACTOR;
-		rotation *= RotateY(d[0]);
-		rotation *= RotateX(d[1]);
+		rotationMat *= RotateY(d[0]);
+		rotationMat *= RotateX(d[1]);
 		mousePosPrev = mousePos;
 	} 
 }
@@ -137,11 +153,25 @@ int main(int argc, char *argv[]) {
 	glutIdleFunc(idle);
 
 	// Set up rotation matrix for entire scene
-	rotation = mat4();
+	rotationMat = mat4();
 	vec3 r(INITIAL_ROTATION);
-	rotation *= RotateX(r[0]);
-	rotation *= RotateY(r[1]);
-	rotation *= RotateZ(-r[2]);
+	rotationMat *= RotateX(r[0]);
+	rotationMat *= RotateY(r[1]);
+	rotationMat *= RotateZ(-r[2]);
+	
+	for (int i=0; i<NUM_CUBES; i++) 
+		positions[i] = i;
+
+	rotateFace(positions,1);
+	/* DEBUG
+	for (int i=0; i<NUM_CUBES; i++) {
+		if (i%3 == 0)
+			putchar('\n');
+		if (i%9 == 0)
+			putchar('\n');
+		printf("%2d ",positions[i]);
+	}
+	*/
 
 	glutMainLoop();
 	return 0;
