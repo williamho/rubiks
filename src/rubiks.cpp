@@ -48,6 +48,7 @@ void init() {
 	uProgress = glGetUniformLocation(program, "progress");
 }
 
+// TODO: keep aspect ratio of cube if window size is not square
 void reshape (int w, int h) {
 	glViewport(0, 0, w, h);
 	winWidth = w;
@@ -61,7 +62,7 @@ void display() {
 
 	glBindVertexArray(vao);
 
-	// Set uniform variables and draw 27 cubes based on initial cube
+	// Pass info about the rotation/scale of the entire Rubik's cube
 	glUniformMatrix4fv(uRotationMat, 1, 0, rotationMat);
 	glUniform1f(uScale,scale);
 
@@ -70,10 +71,19 @@ void display() {
 	if (progress > 1)
 		progress = 0;
 
+	// Let the vertex shader handle all the angle calculations
 	glUniform1f(uProgress,progress);
 	glUniform1iv(uRotations,NUM_CUBES,rotations);
 	glUniform1iv(uRotationsPrev,NUM_CUBES,rotationsPrev);
-	glDrawElementsInstanced(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0, NUM_CUBES);
+
+	// Draw 27 instanced cubes based on initial cube
+	glDrawElementsInstanced(
+		GL_TRIANGLES, 
+		VERT_PER_CUBE, 
+		GL_UNSIGNED_SHORT, 
+		0, 
+		NUM_CUBES
+	);
 
 	glBindVertexArray(0);
 
@@ -81,7 +91,7 @@ void display() {
 }
 
 void keyboard(unsigned char key, int x, int y) {
-	switch( key ) {
+	switch(key) {
 	case 033: // Esc
 	case 'q': 
 		exit( EXIT_SUCCESS );
@@ -159,19 +169,11 @@ int main(int argc, char *argv[]) {
 	rotationMat *= RotateY(r[1]);
 	rotationMat *= RotateZ(-r[2]);
 	
+	// Initialize cube positions array to default positions
 	for (int i=0; i<NUM_CUBES; i++) 
 		positions[i] = i;
 
-	rotateFace(positions,1);
-	/* DEBUG
-	for (int i=0; i<NUM_CUBES; i++) {
-		if (i%3 == 0)
-			putchar('\n');
-		if (i%9 == 0)
-			putchar('\n');
-		printf("%2d ",positions[i]);
-	}
-	*/
+	rotateFace(positions,5); // DEBUG
 
 	glutMainLoop();
 	return 0;
