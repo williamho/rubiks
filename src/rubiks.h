@@ -3,7 +3,7 @@
 #include <Angel.h>
 
 #define VERT_PER_CUBE 36
-#define CUBES_PER_FACE 9
+#define CUBES_PER_PLANE 9
 #define NUM_CUBES 27
 #define DURATION 100
 
@@ -17,7 +17,7 @@
 
 void createVBO();
 float calculateFPS();
-void rotateFace(int cubes[], int faceNum, bool clockwise=true);
+void rotatePlane(int cubes[], int axis, int n, bool isClockwise=true);
 
 extern int winWidth, winHeight;
 extern int positions[NUM_CUBES];

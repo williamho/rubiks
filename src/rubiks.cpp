@@ -144,11 +144,13 @@ void idle() {
 }
 
 int main(int argc, char *argv[]) {
+	glewExperimental = GL_TRUE;
+
 	// Initialize window 
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
 	glutInitWindowSize(winWidth, winHeight);
-	glutInitContextVersion(3, 2);
+	glutInitContextVersion(3, 1);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutCreateWindow("Rubik's Cube");
 	
@@ -173,7 +175,7 @@ int main(int argc, char *argv[]) {
 	for (int i=0; i<NUM_CUBES; i++) 
 		positions[i] = i;
 
-	rotateFace(positions,5); // DEBUG
+	rotatePlane(positions,2,2,true);
 
 	glutMainLoop();
 	return 0;

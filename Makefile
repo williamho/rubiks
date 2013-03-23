@@ -1,7 +1,6 @@
 # OpenGL makefile for Cygwin on Windows
 .NULL: .exe
 
-HEADERS = $(wildcard *.h)
 SOURCES = $(wildcard src/*.cpp)
 OBJECTS = $(addprefix obj/,$(notdir $(SOURCES:.cpp=.o)))
 
@@ -21,7 +20,7 @@ LDFLAGS = $(LDOPTS) $(LDDIRS) $(LDLIBS)
 rubiks: $(OBJECTS)
 	$(CXX) $(CXXFLAGS) $^ $(LDFLAGS) -o $@
 
-obj/%.o: src/%.cpp
+obj/%.o: src/%.cpp 
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 #---------------------------------------------------------------------------
