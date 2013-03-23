@@ -37,16 +37,17 @@ mat4 getRotation() {
 	// Unpack the bits to determine rotation in x, y, and z axes
 	int packed = rotations[gl_InstanceID];
 	int packedPrev = rotationsPrev[gl_InstanceID];
+	const int mask = 3;
 
 	vec3 degreesPrev = 90 * vec3(
-		packedPrev & 3,
-		(packedPrev >> 2) & 3,
-		(packedPrev >> 4) & 3
+		packedPrev & mask,
+		(packedPrev >> 2) & mask,
+		(packedPrev >> 4) & mask
 	);
 	vec3 degreesNext = 90 * vec3(
-		packed & 3,
-		(packed >> 2) & 3,
-		(packed >> 4) & 3
+		packed & mask,
+		(packed >> 2) & mask,
+		(packed >> 4) & mask
 	);
 
 	// Check if one of the degrees is 270 and the other 0
@@ -109,5 +110,8 @@ void main() {
 
 	color = getColor(cubeOffset);
 	gl_Position = rotationMat * getRotation() * vPosition;
+
+	/*if (gl_InstanceID > 0) //DEBUG*/
+		/*gl_Position = vec4(100,100,100,1);*/
 } 
 

@@ -100,7 +100,7 @@ void keyboard(unsigned char key, int x, int y) {
 	}
 	if (key > '0' && key <='9') {
 		int p = key - '1';
-		rotatePlane(positions,p/3,p%3,false);
+		rotatePlane(positions,p/3,p%3,true);
 	}
 }
 
@@ -177,6 +177,7 @@ int main(int argc, char *argv[]) {
 	rotationMat *= RotateZ(-r[2]);
 	
 	// Initialize cube positions array to default positions
+	// if positions[3] == 6, this means cube instance #6 is at position #3.
 	for (int i=0; i<NUM_CUBES; i++) 
 		positions[i] = i;
 
