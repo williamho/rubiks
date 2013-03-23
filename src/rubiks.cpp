@@ -2,13 +2,14 @@
 #include "rubiks.h"
 
 GLuint vao, vbo, ibo;
-GLuint uRotationMat, uScale, uRotations, uRotationsPrev, uProgress;
+GLuint uRotationMat, uScale, uRotations, uRotationsPrev, urotationProgress;
 mat4 rotationMat;
 GLfloat scale = INITIAL_SCALE;
 GLint rotations[NUM_CUBES];
 GLint rotationsPrev[NUM_CUBES];
 int positions[NUM_CUBES];
-GLfloat progress;
+GLfloat rotationProgress = 1.0f;
+int rotationStartTime;
 
 vec2 mousePosPrev;
 bool rightMousePressed;
@@ -45,7 +46,7 @@ void init() {
 	uScale = glGetUniformLocation(program, "scale");
 	uRotations = glGetUniformLocation(program, "rotations");
 	uRotationsPrev = glGetUniformLocation(program, "rotationsPrev");
-	uProgress = glGetUniformLocation(program, "progress");
+	urotationProgress = glGetUniformLocation(program, "rotationProgress");
 }
 
 // TODO: keep aspect ratio of cube if window size is not square
@@ -66,13 +67,13 @@ void display() {
 	glUniformMatrix4fv(uRotationMat, 1, 0, rotationMat);
 	glUniform1f(uScale,scale);
 
-	// DEBUG
-	progress += 0.001;
-	if (progress > 1)
-		progress = 0;
+	if (IS_ROTATING) 
+		rotationProgress = ((float)glutGet(GLUT_ELAPSED_TIME)-rotationStartTime)/ROTATION_DURATION;
+	if (rotationProgress > 1.0f)
+		rotationProgress = 1.0f;
 
 	// Let the vertex shader handle all the angle calculations
-	glUniform1f(uProgress,progress);
+	glUniform1f(urotationProgress,rotationProgress);
 	glUniform1iv(uRotations,NUM_CUBES,rotations);
 	glUniform1iv(uRotationsPrev,NUM_CUBES,rotationsPrev);
 
@@ -96,6 +97,10 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'q': 
 		exit( EXIT_SUCCESS );
 		break;
+	}
+	if (key > '0' && key <='9') {
+		int p = key - '1';
+		rotatePlane(positions,p/3,p%3,false);
 	}
 }
 
@@ -174,8 +179,6 @@ int main(int argc, char *argv[]) {
 	// Initialize cube positions array to default positions
 	for (int i=0; i<NUM_CUBES; i++) 
 		positions[i] = i;
-
-	rotatePlane(positions,2,2,true);
 
 	glutMainLoop();
 	return 0;

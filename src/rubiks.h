@@ -5,7 +5,7 @@
 #define VERT_PER_CUBE 36
 #define CUBES_PER_PLANE 9
 #define NUM_CUBES 27
-#define DURATION 100
+#define ROTATION_DURATION 200
 
 #define INITIAL_ROTATION 45.0, 45.0, 45.0
 #define ROTATION_FACTOR  0.5
@@ -23,6 +23,10 @@ extern int winWidth, winHeight;
 extern int positions[NUM_CUBES];
 extern GLint rotations[NUM_CUBES];
 extern GLint rotationsPrev[NUM_CUBES];
+extern GLfloat rotationProgress;
+extern int rotationStartTime;
+
+#define IS_ROTATING (rotationProgress < 1.0f)
 
 #endif
 

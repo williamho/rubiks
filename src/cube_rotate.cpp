@@ -1,29 +1,31 @@
 #include <Angel.h>
 #include "rubiks.h"
 
-int addRotation(int packed, int axis, bool clockwise=true) {
+int addRotation(int *packed, int axis, bool isClockwise=true) {
 	// Z-axis is weird and reversed
 	if (axis == 2)
-		clockwise = !clockwise;
+		isClockwise = !isClockwise;
 
-	// Fetch the two bits corresponding to rotation for this axis
-	int mask = 3 << (axis*2); 
-	if (clockwise) {
-		if (packed & mask) 
-			packed -= 1 << (axis*2);
-		else  // If bits are 00, set to 11
-			packed |= mask;
-	}
-	else {
-		if (packed & mask == mask) // If bits are 11, set to 00
-			packed &= ~mask;
-		else
-			packed += 1 << (axis*2);
-	}
-	return packed;
+	const int mask = 3;
+	int shift = axis * 2;
+
+	// Unpack the bits to get the rotation of the cube (0 to 3 -> 0 to 270)
+	int unpacked = (*packed & (mask << shift)) >> shift;
+
+	// Update the info based on `isClockwise` and repack the bits
+	unpacked += isClockwise ? -1 : 1;
+	unpacked &= mask;
+	*packed &= ~(mask << shift);
+	*packed |= unpacked << shift;
+
+	return *packed;
 }
 
 void rotatePlane(int cubes[], int axis, int n, bool isClockwise) {
+	if (IS_ROTATING) // Current rotation not done. Do nothing.
+		return;
+	memcpy(rotationsPrev,rotations,sizeof(rotations));
+
 	int planeNum = axis*3 + n;
 	const int planes[9][9] = {
 		// Planes x=0 to x=2
@@ -46,19 +48,32 @@ void rotatePlane(int cubes[], int axis, int n, bool isClockwise) {
 	     6 7 8    8 5 2        6 7 8    0 3 6
 		    Clockwise         Counterclockwise  */
 	const int newIndicesCW[CUBES_PER_PLANE] = {6,3,0,7,4,1,8,5,2};
+	const int newIndicesCCW[CUBES_PER_PLANE] = {2,5,8,1,4,7,0,3,6};
+	const int *newIndices = isClockwise ? newIndicesCW : newIndicesCCW;
 
 	int newPlane[CUBES_PER_PLANE];
-	memcpy(rotationsPrev,rotations,sizeof(rotations));
 	for (int i=0; i<CUBES_PER_PLANE; i++) {
-		if (isClockwise)
-			newPlane[i] = cubes[planes[planeNum][newIndicesCW[i]]];
-		else // If counter-clockwise, simply reverse the indices 
-			newPlane[newIndicesCW[i]] = cubes[planes[planeNum][i]];
+		newPlane[i] = cubes[planes[planeNum][newIndices[i]]];
 			
-		int *cubeRotation = &rotations[planes[planeNum][i]];
-		*cubeRotation = addRotation(*cubeRotation,axis,isClockwise);
+		int *cubeRotation = &rotations[cubes[newPlane[i]]];
+		addRotation(cubeRotation,axis,isClockwise);
 	}
 	for (int i=0; i<CUBES_PER_PLANE; i++)
 		cubes[planes[planeNum][i]] = newPlane[i];
+
+	// DEBUG
+	/*
+	char c[5];
+	for (int i=0; i<NUM_CUBES; i++) {
+		if (i%3 == 0)
+			fprintf(stderr,"\n");
+		if (i%9 == 0)
+			fprintf(stderr,"\n");
+
+		fprintf(stderr,"%2d ",cubes[i]);
+	}
+	*/
+	rotationStartTime = glutGet(GLUT_ELAPSED_TIME);
+	rotationProgress = 0.0f;
 }
 

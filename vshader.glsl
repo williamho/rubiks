@@ -4,7 +4,7 @@ in vec4 vPosition;
 out vec4 color;
 uniform mat4 rotationMat; // Rotate the entire Rubik's cube
 uniform float scale;      // Scale the entire Rubik's cube
-uniform float progress;   // In the middle of a rotation, 0.0 to 1.0
+uniform float rotationProgress;   // In the middle of a rotation, 0.0 to 1.0
 
 // Arrays of bit-packed ints with individual sub-cube rotation info
 uniform int rotations[27];     
@@ -55,15 +55,15 @@ mat4 getRotation() {
 	for (int i=0; i<3; i++) {
 		if (degreeChange[i] > 90) // degreesPrev[i] is 0
 			degreesPrev[i] = 360;
-		else if (degreeChange[i] <= -90) // degreesNext[i] is 0
+		else if (degreeChange[i] < -90) // degreesNext[i] is 0
 			degreesNext[i] = 360;
 	}
 
-	// Interpolate rotation based on progress
+	// Interpolate rotation based on rotationProgress
 	vec3 radiansCurr = mix(
 		radians(degreesPrev), 
 		radians(degreesNext), 
-		progress
+		rotationProgress
 	);
 
 	// Calculate rotation matrices
