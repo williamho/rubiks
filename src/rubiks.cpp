@@ -2,11 +2,11 @@
 #include "rubiks.h"
 
 GLuint vao, vbo, ibo;
-GLuint uRotationMat, uScale, uRotations, uRotationsPrev, urotationProgress;
+GLuint uRotationMat, uScale, uRotations, uRotationsPrev, uRotationProgress;
 mat4 rotationMat;
 GLfloat scale = INITIAL_SCALE;
 GLint rotations[NUM_CUBES];
-GLint rotationsPrev[NUM_CUBES];
+mat4 rotationsPrev[NUM_CUBES];
 int positions[NUM_CUBES];
 GLfloat rotationProgress = 1.0f;
 int rotationStartTime;
@@ -46,7 +46,7 @@ void init() {
 	uScale = glGetUniformLocation(program, "scale");
 	uRotations = glGetUniformLocation(program, "rotations");
 	uRotationsPrev = glGetUniformLocation(program, "rotationsPrev");
-	urotationProgress = glGetUniformLocation(program, "rotationProgress");
+	uRotationProgress = glGetUniformLocation(program, "rotationProgress");
 }
 
 // TODO: keep aspect ratio of cube if window size is not square
@@ -73,9 +73,9 @@ void display() {
 		rotationProgress = 1.0f;
 
 	// Let the vertex shader handle all the angle calculations
-	glUniform1f(urotationProgress,rotationProgress);
+	glUniform1f(uRotationProgress,rotationProgress);
 	glUniform1iv(uRotations,NUM_CUBES,rotations);
-	glUniform1iv(uRotationsPrev,NUM_CUBES,rotationsPrev);
+	glUniformMatrix4fv(uRotationsPrev,NUM_CUBES,false, (GLfloat*) rotationsPrev);
 
 	// Draw 27 instanced cubes based on initial cube
 	glDrawElementsInstanced(
@@ -178,8 +178,11 @@ int main(int argc, char *argv[]) {
 	
 	// Initialize cube positions array to default positions
 	// if positions[3] == 6, this means cube instance #6 is at position #3.
-	for (int i=0; i<NUM_CUBES; i++) 
+	for (int i=0; i<NUM_CUBES; i++) {
 		positions[i] = i;
+		rotationsPrev[i] = mat4(1);
+		rotations[i] = 0;
+	}
 
 	glutMainLoop();
 	return 0;

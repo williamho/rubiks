@@ -8,7 +8,7 @@ uniform float rotationProgress;   // In the middle of a rotation, 0.0 to 1.0
 
 // Arrays of bit-packed ints with individual sub-cube rotation info
 uniform int rotations[27];     
-uniform int rotationsPrev[27];
+uniform mat4 rotationsPrev[27];
 
 /** Based on which sub-cube this is, determine color of this vertex */
 vec4 getColor(vec4 cubeOffset) {
@@ -34,68 +34,47 @@ vec4 getColor(vec4 cubeOffset) {
 /** Based on which sub-cube this is, and the uniform rotations/rotationsPrev 
     arrays, determine the angle of rotation of this vertex */
 mat4 getRotation() {
-	// Unpack the bits to determine rotation in x, y, and z axes
-	int packed = rotations[gl_InstanceID];
-	int packedPrev = rotationsPrev[gl_InstanceID];
-	const int mask = 3;
-
-	vec3 degreesPrev = 90 * vec3(
-		packedPrev & mask,
-		(packedPrev >> 2) & mask,
-		(packedPrev >> 4) & mask
-	);
-	vec3 degreesNext = 90 * vec3(
-		packed & mask,
-		(packed >> 2) & mask,
-		(packed >> 4) & mask
-	);
-
-	// Check if one of the degrees is 270 and the other 0
-	// (necessary because `mix` is unaware that 0 degrees is also 360)
-	vec3 degreeChange = degreesNext - degreesPrev;
-	for (int i=0; i<3; i++) {
-		if (degreeChange[i] > 90) // degreesPrev[i] is 0
-			degreesPrev[i] = 360;
-		else if (degreeChange[i] < -90) // degreesNext[i] is 0
-			degreesNext[i] = 360;
-	}
+	if (rotations[gl_InstanceID] == 0)
+		return rotationsPrev[gl_InstanceID];
 
 	// Interpolate rotation based on rotationProgress
-	vec3 radiansCurr = mix(
-		radians(degreesPrev), 
-		radians(degreesNext), 
+	float radiansCurr = mix(
+		0, 
+		radians(90 * (rotations[gl_InstanceID] > 0 ? -1 : 1)), 
 		rotationProgress
 	);
 
 	// Calculate rotation matrices
-	vec3 c = cos(radiansCurr);
-	vec3 s = sin(radiansCurr);
-
-	mat4 rx = mat4( 
-		1.0,  0.0,  0.0,  0.0,
-		0.0,  c.x,  s.x,  0.0,
-		0.0, -s.x,  c.x,  0.0,
-		0.0,  0.0,  0.0,  1.0 
-	);
-	mat4 ry = mat4( 
-		c.y,  0.0, -s.y,  0.0,
-		0.0,  1.0,  0.0,  0.0,
-		s.y,  0.0,  c.y,  0.0,
-		0.0,  0.0,  0.0,  1.0 
-	);
-	mat4 rz = mat4( 
-		c.z, -s.z,  0.0,  0.0,
-		s.z,  c.z,  0.0,  0.0,
-		0.0,  0.0,  1.0,  0.0,
-		0.0,  0.0,  0.0,  1.0 
-	);
-
-	// Workaround for bug in ATI driver (??)
-	ry[1][0] = 0.0;
-	ry[1][1] = 1.0;
-	rz[2][2] = 1.0;
-
-	return rz * ry * rx;
+	float c = cos(radiansCurr);
+	float s = sin(radiansCurr);
+	mat4 r;
+	switch(rotations[gl_InstanceID]) {
+	case -1: case 1:
+		r = mat4( 
+			1.0,  0.0,  0.0,  0.0,
+			0.0,    c,    s,  0.0,
+			0.0,   -s,    c,  0.0,
+			0.0,  0.0,  0.0,  1.0 
+		);
+		break;
+	case -2: case 2:
+		r = mat4( 
+			  c,  0.0,   -s,  0.0,
+			0.0,  1.0,  0.0,  0.0,
+			  s,  0.0,    c,  0.0,
+			0.0,  0.0,  0.0,  1.0 
+		);
+		break;
+	case -3: case 3:
+		r = mat4( 
+			  c,   -s,  0.0,  0.0,
+			  s,    c,  0.0,  0.0,
+			0.0,  0.0,  1.0,  0.0,
+			0.0,  0.0,  0.0,  1.0 
+		);
+		break;
+	}
+	return r*rotationsPrev[gl_InstanceID];
 }
 
 void main() {
@@ -110,8 +89,5 @@ void main() {
 
 	color = getColor(cubeOffset);
 	gl_Position = rotationMat * getRotation() * vPosition;
-
-	/*if (gl_InstanceID > 0) //DEBUG*/
-		/*gl_Position = vec4(100,100,100,1);*/
 } 
 
