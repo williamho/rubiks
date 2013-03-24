@@ -2,7 +2,7 @@
 #include "rubiks.h"
 
 GLuint vao, vbo, ibo;
-GLuint uRotationMat, uScale, uRotations, uRotationsPrev, urotationProgress;
+GLuint uRotationMat, uScale, uRotations, uRotationsPrev, uRotationProgress, uPositions;
 mat4 rotationMat;
 GLfloat scale = INITIAL_SCALE;
 GLint rotations[NUM_CUBES];
@@ -44,9 +44,10 @@ void init() {
 
 	uRotationMat = glGetUniformLocation(program, "rotationMat");
 	uScale = glGetUniformLocation(program, "scale");
+	uPositions = glGetUniformLocation(program, "positions");
 	uRotations = glGetUniformLocation(program, "rotations");
 	uRotationsPrev = glGetUniformLocation(program, "rotationsPrev");
-	urotationProgress = glGetUniformLocation(program, "rotationProgress");
+	uRotationProgress = glGetUniformLocation(program, "rotationProgress");
 }
 
 // TODO: keep aspect ratio of cube if window size is not square
@@ -73,7 +74,8 @@ void display() {
 		rotationProgress = 1.0f;
 
 	// Let the vertex shader handle all the angle calculations
-	glUniform1f(urotationProgress,rotationProgress);
+	glUniform1f(uRotationProgress,rotationProgress);
+	glUniform1iv(uPositions,NUM_CUBES,positions);
 	glUniform1iv(uRotations,NUM_CUBES,rotations);
 	glUniform1iv(uRotationsPrev,NUM_CUBES,rotationsPrev);
 

@@ -6,12 +6,22 @@ uniform mat4 rotationMat; // Rotate the entire Rubik's cube
 uniform float scale;      // Scale the entire Rubik's cube
 uniform float rotationProgress;   // In the middle of a rotation, 0.0 to 1.0
 
+uniform int positions[27];     
 // Arrays of bit-packed ints with individual sub-cube rotation info
 uniform int rotations[27];     
 uniform int rotationsPrev[27];
 
 /** Based on which sub-cube this is, determine color of this vertex */
-vec4 getColor(vec4 cubeOffset) {
+vec4 getColor() {
+	int cubePosition = positions[gl_InstanceID];
+	int x = cubePosition%3 - 1;
+	int y = (cubePosition%9)/3 - 1;
+	int z = cubePosition/9 - 1;
+	vec4 cubeOffset = vec4(x, y, z, 1.0);
+
+	float tmp = (1.0/27)*cubePosition;
+	return vec4(tmp,tmp,tmp,1.0);
+
 	const vec4 faceColors[6] = {
 		vec4(1.0, 0.5, 0.0, 1.0), // Left   (-x) Orange
 		vec4(1.0, 0.0, 0.0, 1.0), // Right  (+x) Red
@@ -31,24 +41,25 @@ vec4 getColor(vec4 cubeOffset) {
 	return vec4(0.0, 0.0, 0.0, 1.0);
 }
 
+vec3 unpack(int packed) {
+	const int mask = 3;
+
+	return vec3(
+		packed & mask,
+		(packed >> 2) & mask,
+		(packed >> 4) & mask
+	);
+}
+
 /** Based on which sub-cube this is, and the uniform rotations/rotationsPrev 
     arrays, determine the angle of rotation of this vertex */
 mat4 getRotation() {
 	// Unpack the bits to determine rotation in x, y, and z axes
 	int packed = rotations[gl_InstanceID];
 	int packedPrev = rotationsPrev[gl_InstanceID];
-	const int mask = 3;
 
-	vec3 degreesPrev = 90 * vec3(
-		packedPrev & mask,
-		(packedPrev >> 2) & mask,
-		(packedPrev >> 4) & mask
-	);
-	vec3 degreesNext = 90 * vec3(
-		packed & mask,
-		(packed >> 2) & mask,
-		(packed >> 4) & mask
-	);
+	vec3 degreesPrev = 90*unpack(rotationsPrev[gl_InstanceID]);
+	vec3 degreesNext = 90*unpack(rotations[gl_InstanceID]);
 
 	// Check if one of the degrees is 270 and the other 0
 	// (necessary because `mix` is unaware that 0 degrees is also 360)
@@ -108,8 +119,11 @@ void main() {
 	vPosition += cubeOffset*1.05; // Leave some space between sub-cubes
 	vPosition.xyz *= scale;
 
-	color = getColor(cubeOffset);
-	gl_Position = rotationMat * getRotation() * vPosition;
+	if (rotationProgress < 1.0f)
+		vPosition = getRotation() * vPosition;
+
+	color = getColor();
+	gl_Position = rotationMat * vPosition;
 
 	/*if (gl_InstanceID > 0) //DEBUG*/
 		/*gl_Position = vec4(100,100,100,1);*/

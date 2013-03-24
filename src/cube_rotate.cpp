@@ -71,39 +71,6 @@ void rotatePlane(int cubes[], int axis, int n, bool isClockwise) {
 		addRotation(cubeRotation,axis,isClockwise);
 	}
 		
-	/*
-	//DEBUG-------------
-	printf("cubes rotated: ");
-	qsort(newPlane,CUBES_PER_PLANE,sizeof(int),comp);
-	for (int i=0; i<CUBES_PER_PLANE; i++)
-		printf("%d ", newPlane[i]);
-		//printf("%d ", rotations[newPlane[i]]);
-	putchar('\n');
-	//--------------------
-	*/
-
-	// DEBUG--------------------------------
-	char c[10];
-	for (int i=0; i<NUM_CUBES; i++) {
-		if (i%3 == 0)
-			fprintf(stderr,"\n");
-		if (i%9 == 0)
-			fprintf(stderr,"\n");
-
-		fprintf(stderr,"%2d ",cubes[i]);
-	}
-	fprintf(stderr,"\n----");
-
-	for (int i=0; i<NUM_CUBES; i++) {
-		if (i%3 == 0)
-			fprintf(stderr,"\n");
-		if (i%9 == 0)
-			fprintf(stderr,"\n");
-
-		fprintf(stderr,"%2d ",rotations[cubes[i]]);
-	}
-	fprintf(stderr,"\n----");
-	//--------------------------------------
 	rotationStartTime = glutGet(GLUT_ELAPSED_TIME);
 	rotationProgress = 0.0f;
 }
