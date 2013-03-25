@@ -7,7 +7,7 @@ GLuint uRotationMat, uScale, uRotations, uRotationsPrev,
 mat4 rotationMat;
 GLfloat scale = INITIAL_SCALE;
 GLint rotations[NUM_CUBES];
-GLint rotationsPrev[NUM_CUBES];
+GLint rotationAxes[NUM_CUBES];
 GLint positions[NUM_CUBES];
 GLfloat rotationProgress = 1.0f;
 int rotationStartTime;
@@ -47,7 +47,7 @@ void init() {
 	uScale = glGetUniformLocation(program, "scale");
 	uPositions = glGetUniformLocation(program, "positions");
 	uRotations = glGetUniformLocation(program, "rotations");
-	uRotationsPrev = glGetUniformLocation(program, "rotationsPrev");
+	uRotationsPrev = glGetUniformLocation(program, "rotationAxes");
 	uRotationProgress = glGetUniformLocation(program, "rotationProgress");
 }
 
@@ -79,7 +79,7 @@ void display() {
 	glUniform1f(uRotationProgress,rotationProgress);
 	glUniform1iv(uPositions,NUM_CUBES,positions);
 	glUniform1iv(uRotations,NUM_CUBES,rotations);
-	glUniform1iv(uRotationsPrev,NUM_CUBES,rotationsPrev);
+	glUniform1iv(uRotationsPrev,NUM_CUBES,rotationAxes);
 
 	// Draw 27 instanced cubes based on initial cube
 	glDrawElementsInstanced(
@@ -136,7 +136,7 @@ void mouseMotion(int x, int y) {
 	// If right mouse pressed, changes in mouse position will rotate scene
 	if(rightMousePressed) {
 		vec2 d = mousePos - mousePosPrev;
-		d *= ROTATION_FACTOR;
+		d *= -ROTATION_FACTOR;
 		rotationMat *= RotateY(d[0]);
 		rotationMat *= RotateX(d[1]);
 		mousePosPrev = mousePos;
