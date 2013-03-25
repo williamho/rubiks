@@ -2,11 +2,10 @@
 #include "rubiks.h"
 
 GLuint vao, vbo, ibo;
-GLuint uRotationMat, uScale, uRotations, uRotationAxes, 
+GLuint uRotationMat, uScale, uRotationAxes, 
 	uRotationProgress, uPositions, uRotatingSlice, uCubeId, uColors;
 mat4 rotationMat;
 GLfloat scale = INITIAL_SCALE;
-mat4 rotations[NUM_CUBES];
 GLint colors[NUM_CUBES][FACES_PER_CUBE];
 GLint rotationAxes[NUM_CUBES];
 GLint cubeId;
@@ -49,7 +48,6 @@ void init() {
 	uRotationMat = glGetUniformLocation(program, "rotationMat");
 	uScale = glGetUniformLocation(program, "scale");
 	uPositions = glGetUniformLocation(program, "positions");
-	uRotations = glGetUniformLocation(program, "rotations");
 	uCubeId = glGetUniformLocation(program, "cubeId");
 	uColors = glGetUniformLocation(program, "colors");
 	uRotationAxes = glGetUniformLocation(program, "rotationAxes");
@@ -83,31 +81,15 @@ void display() {
 
 	// Let the vertex shader handle all the angle calculations
 	glUniform1f(uRotationProgress,rotationProgress);
-	/*
-	glUniform1iv(uPositions,NUM_CUBES,positions);
-	glUniform1iv(uRotations,NUM_CUBES,rotations);
-	glUniform1iv(uRotationAxes,NUM_CUBES,rotationAxes);
-	*/
 
-	// Draw 27 instanced cubes based on initial cube
+	// Draw 27 cubes based on initial cube
 	for (int i=0; i<NUM_CUBES; i++) {
 		glUniform1i(uCubeId,i);
 		glUniform1i(uPositions,positions[i]);
 		glUniform1iv(uColors,FACES_PER_CUBE,colors[i]);
-		glUniformMatrix4fv(uRotations,1,false,(GLfloat*) rotations[i]);
 		glUniform1i(uRotationAxes,rotationAxes[i]);
 		glDrawElements(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0); 
 	}
-
-/*
-	glDrawElementsInstanced(
-		GL_TRIANGLES, 
-		VERT_PER_CUBE, 
-		GL_UNSIGNED_SHORT, 
-		0, 
-		NUM_CUBES
-	);
-	*/
 
 	glBindVertexArray(0);
 
@@ -214,10 +196,9 @@ int main(int argc, char *argv[]) {
 	
 	// Initialize cube positions array to default positions
 	// if positions[3] == 6, this means cube instance #6 is at position #3.
-	for (int i=0; i<NUM_CUBES; i++) {
+	for (int i=0; i<NUM_CUBES; i++) 
 		positions[i] = i;
-		rotations[i] = mat4(1);
-	}
+
 	initColors();
 
 	glutMainLoop();

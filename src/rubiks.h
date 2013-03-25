@@ -25,7 +25,6 @@ void updateCubes();
 
 extern int winWidth, winHeight;
 extern GLint positions[NUM_CUBES];
-extern mat4 rotations[NUM_CUBES];
 extern GLint rotationAxes[NUM_CUBES];
 extern GLfloat rotationProgress;
 extern int rotationStartTime;

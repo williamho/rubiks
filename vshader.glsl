@@ -9,7 +9,6 @@ uniform float rotationProgress;   // In the middle of a rotation, 0.0 to 1.0
 uniform int cubeId;
 uniform int positions;     
 
-uniform mat4 rotations;     
 uniform int rotationAxes;
 uniform int colors[6];
 
@@ -73,7 +72,7 @@ mat4 getSliceRotation() {
 	int rotationAxis = (r < 0 ? -r : r) - 1;
 	int rotationAngle = (r < 0 ? -90 : 90);
 
-	// For some reason this is necessary (why?)
+	// For some reason this is necessary (not entirely sure why)
 	if (rotationAxis != 0)
 		rotationAngle *= -1;
 
