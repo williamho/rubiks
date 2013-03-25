@@ -74,8 +74,8 @@ mat4 getSliceRotation() {
 	int rotationAngle = (r < 0 ? -90 : 90);
 
 	// For some reason this is necessary (why?)
-	//if (rotationAxis == 0)
-		//rotationAngle *= -1;
+	if (rotationAxis != 0)
+		rotationAngle *= -1;
 
 	float radiansCurr = mix(0, radians(rotationAngle), rotationProgress);
 

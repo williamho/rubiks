@@ -120,6 +120,19 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'q': 
 		exit( EXIT_SUCCESS );
 		break;
+	case '!': key = 1; break;
+	case '@': key = 2; break;
+	case '#': key = 3; break;
+	case '$': key = 4; break;
+	case '%': key = 5; break;
+	case '^': key = 6; break;
+	case '&': key = 7; break;
+	case '*': key = 8; break;
+	case '(': key = 9; break;
+	}
+	if (key <= 9) {
+		key--;
+		rotateSlice(positions,key/3,key%3,false);
 	}
 	if (key > '0' && key <='9') {
 		int p = key - '1';

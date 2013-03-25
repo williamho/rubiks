@@ -8,25 +8,30 @@ int newCubeColors[CUBES_PER_PLANE][FACES_PER_CUBE];
 
 void addRotation(int cubeNum, int axis, bool isClockwise=true) {
 	const int cwX[] = {0,1,4,5,3,2};
+	const int ccwX[] = {0,1,5,4,2,3};
 	const int cwY[] = {4,5,2,3,1,0};
+	const int ccwY[] = {5,4,2,3,0,1};
 	const int cwZ[] = {2,3,1,0,4,5};
+	const int ccwZ[] = {3,2,0,1,4,5};
 	const int *rotate;
 
 	switch(axis) {
-	case 0: rotate = cwX; break;
-	case 1: rotate = cwY; break;
-	case 2: rotate = cwZ; break;
+	case 0: 
+		rotate = isClockwise ? cwX : ccwX; 
+		break;
+	case 1: 
+		rotate = isClockwise ? cwY : ccwY; 
+		break;
+	case 2:
+		rotate = isClockwise ? cwZ : ccwZ; 
+		break;
 	}
 	int newColors[FACES_PER_CUBE];
-	for (int i = 0; i < FACES_PER_CUBE; i++) {
-		if (!isClockwise)
-			newColors[i] = colors[cubeNum][rotate[i]];
-		else
-			newColors[rotate[i]] = colors[cubeNum][i];
-	}
-	for (int i = 0; i < FACES_PER_CUBE; i++) {
+	for (int i = 0; i < FACES_PER_CUBE; i++)
+		newColors[rotate[i]] = colors[cubeNum][i];
+	for (int i = 0; i < FACES_PER_CUBE; i++) 
 		colors[cubeNum][i] = newColors[i];
-	}
+
 }
 
 void rotateSlice(int cubes[], int axis, int n, bool isClockwise) {
