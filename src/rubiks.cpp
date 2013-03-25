@@ -3,14 +3,16 @@
 
 GLuint vao, vbo, ibo;
 GLuint uRotationMat, uScale, uRotations, uRotationAxes, 
-	uRotationProgress, uPositions, uRotatingSlice, uCubeId;
+	uRotationProgress, uPositions, uRotatingSlice, uCubeId, uColors;
 mat4 rotationMat;
 GLfloat scale = INITIAL_SCALE;
 mat4 rotations[NUM_CUBES];
+GLint colors[NUM_CUBES][FACES_PER_CUBE];
 GLint rotationAxes[NUM_CUBES];
 GLint cubeId;
 GLint positions[NUM_CUBES];
 GLfloat rotationProgress = 1.0f;
+bool finishedRotating=true;
 int rotationStartTime;
 
 vec2 mousePosPrev;
@@ -49,6 +51,7 @@ void init() {
 	uPositions = glGetUniformLocation(program, "positions");
 	uRotations = glGetUniformLocation(program, "rotations");
 	uCubeId = glGetUniformLocation(program, "cubeId");
+	uColors = glGetUniformLocation(program, "colors");
 	uRotationAxes = glGetUniformLocation(program, "rotationAxes");
 	uRotationProgress = glGetUniformLocation(program, "rotationProgress");
 }
@@ -73,8 +76,10 @@ void display() {
 
 	if (IS_ROTATING) 
 		rotationProgress = ((float)glutGet(GLUT_ELAPSED_TIME)-rotationStartTime)/ROTATION_DURATION;
-	if (rotationProgress > 1.0f) 
+	if (rotationProgress >= 1.0f && !finishedRotating) {
 		rotationProgress = 1.0f;
+		updateCubes();
+	}
 
 	// Let the vertex shader handle all the angle calculations
 	glUniform1f(uRotationProgress,rotationProgress);
@@ -88,6 +93,7 @@ void display() {
 	for (int i=0; i<NUM_CUBES; i++) {
 		glUniform1i(uCubeId,i);
 		glUniform1i(uPositions,positions[i]);
+		glUniform1iv(uColors,FACES_PER_CUBE,colors[i]);
 		glUniformMatrix4fv(uRotations,1,false,(GLfloat*) rotations[i]);
 		glUniform1i(uRotationAxes,rotationAxes[i]);
 		glDrawElements(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0); 
@@ -199,6 +205,7 @@ int main(int argc, char *argv[]) {
 		positions[i] = i;
 		rotations[i] = mat4(1);
 	}
+	initColors();
 
 	glutMainLoop();
 	return 0;

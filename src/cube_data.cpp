@@ -56,3 +56,28 @@ void createVBO() {
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STATIC_DRAW);
 }
 
+int getColor(int posNum, int faceId) {
+	vec3 cubePosition = vec3(
+		posNum%3 - 1, 
+		(posNum%9)/3 - 1,
+		posNum/9 - 1
+	);
+
+	// Determine which face of the Rubik's cube this sub-cube is part of
+	for (int i=0; i<6; i++) {
+		if (cubePosition[i/2] == i%2*2-1 && faceId == i)
+			return i;
+	}
+
+	// No matches found: this vertex is black
+	return -1;
+}
+
+void initColors() {
+	for (int c=0; c<NUM_CUBES; c++) {
+		for (int f=0; f<FACES_PER_CUBE; f++) {
+			colors[c][f] = getColor(c,f);
+		}
+	}
+}
+
