@@ -7,7 +7,7 @@
 #define NUM_CUBES 27
 #define ROTATION_DURATION 200
 
-#define INITIAL_ROTATION 45.0, 45.0, 45.0
+#define INITIAL_ROTATION 45.0, 45.0, -45.0
 #define ROTATION_FACTOR  0.5
 
 #define INITIAL_SCALE    0.5
@@ -17,7 +17,7 @@
 
 void createVBO();
 float calculateFPS();
-void rotatePlane(int cubes[], int axis, int n, bool isClockwise=true);
+void rotateSlice(int cubes[], int axis, int n, bool isClockwise=true);
 
 extern int winWidth, winHeight;
 extern int positions[NUM_CUBES];

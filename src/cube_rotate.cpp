@@ -13,7 +13,7 @@ int addRotation(int *packed, int axis, bool isClockwise=true) {
 	int unpacked = (*packed & (mask << shift)) >> shift;
 
 	// Update the info based on `isClockwise` and repack the bits
-	unpacked += isClockwise ? -1 : 1;
+	unpacked += isClockwise ? 1 : -1;
 	unpacked &= mask;
 	*packed &= ~(mask << shift);
 	*packed |= unpacked << shift;
@@ -31,12 +31,12 @@ int comp (const void * elem1, const void * elem2) {
 }
 //DEBUG----------------------------
 
-void rotatePlane(int cubes[], int axis, int n, bool isClockwise) {
+void rotateSlice(int cubes[], int axis, int n, bool isClockwise) {
 	if (IS_ROTATING) // Current rotation not done. Do nothing.
 		return;
 	memcpy(rotationsPrev,rotations,sizeof(rotations));
 
-	int planeNum = axis*3 + n;
+	int sliceNum = axis*3 + n;
 	const int planes[9][9] = { // Positions on the cube that correspond to planes
 		// Planes x=0 to x=2
 		{  0,  3,  6,  9, 12, 15, 18, 21, 24},
@@ -61,12 +61,15 @@ void rotatePlane(int cubes[], int axis, int n, bool isClockwise) {
 	const int newIndicesCCW[CUBES_PER_PLANE] = {2,5,8,1,4,7,0,3,6};
 	const int *newIndices = isClockwise ? newIndicesCW : newIndicesCCW;
 
+	memset(rotationsPrev, 0, sizeof(rotationsPrev)); // TESTING
+
 	int newPlane[CUBES_PER_PLANE];
 	for (int i=0; i<CUBES_PER_PLANE; i++) {
-		newPlane[i] = cubes[planes[planeNum][newIndices[i]]];
+		newPlane[i] = cubes[planes[sliceNum][newIndices[i]]];
+		rotationsPrev[planes[sliceNum][i]] = (axis+1) * (isClockwise ? 1 : -1); // TESTING
 	}
 	for (int i=0; i<CUBES_PER_PLANE; i++) {
-		cubes[planes[planeNum][i]] = newPlane[i];
+		cubes[planes[sliceNum][i]] = newPlane[i];
 		int *cubeRotation = &rotations[newPlane[i]];
 		addRotation(cubeRotation,axis,isClockwise);
 	}

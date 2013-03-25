@@ -2,12 +2,13 @@
 #include "rubiks.h"
 
 GLuint vao, vbo, ibo;
-GLuint uRotationMat, uScale, uRotations, uRotationsPrev, uRotationProgress, uPositions;
+GLuint uRotationMat, uScale, uRotations, uRotationsPrev, 
+	uRotationProgress, uPositions, uRotatingSlice;
 mat4 rotationMat;
 GLfloat scale = INITIAL_SCALE;
 GLint rotations[NUM_CUBES];
 GLint rotationsPrev[NUM_CUBES];
-int positions[NUM_CUBES];
+GLint positions[NUM_CUBES];
 GLfloat rotationProgress = 1.0f;
 int rotationStartTime;
 
@@ -70,8 +71,9 @@ void display() {
 
 	if (IS_ROTATING) 
 		rotationProgress = ((float)glutGet(GLUT_ELAPSED_TIME)-rotationStartTime)/ROTATION_DURATION;
-	if (rotationProgress > 1.0f)
+	if (rotationProgress > 1.0f) 
 		rotationProgress = 1.0f;
+
 
 	// Let the vertex shader handle all the angle calculations
 	glUniform1f(uRotationProgress,rotationProgress);
@@ -102,7 +104,7 @@ void keyboard(unsigned char key, int x, int y) {
 	}
 	if (key > '0' && key <='9') {
 		int p = key - '1';
-		rotatePlane(positions,p/3,p%3,true);
+		rotateSlice(positions,p/3,p%3,true);
 	}
 }
 
