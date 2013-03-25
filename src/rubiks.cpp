@@ -2,12 +2,13 @@
 #include "rubiks.h"
 
 GLuint vao, vbo, ibo;
-GLuint uRotationMat, uScale, uRotations, uRotationsPrev, 
-	uRotationProgress, uPositions, uRotatingSlice;
+GLuint uRotationMat, uScale, uRotations, uRotationAxes, 
+	uRotationProgress, uPositions, uRotatingSlice, uCubeId;
 mat4 rotationMat;
 GLfloat scale = INITIAL_SCALE;
-GLint rotations[NUM_CUBES];
+mat4 rotations[NUM_CUBES];
 GLint rotationAxes[NUM_CUBES];
+GLint cubeId;
 GLint positions[NUM_CUBES];
 GLfloat rotationProgress = 1.0f;
 int rotationStartTime;
@@ -47,7 +48,8 @@ void init() {
 	uScale = glGetUniformLocation(program, "scale");
 	uPositions = glGetUniformLocation(program, "positions");
 	uRotations = glGetUniformLocation(program, "rotations");
-	uRotationsPrev = glGetUniformLocation(program, "rotationAxes");
+	uCubeId = glGetUniformLocation(program, "cubeId");
+	uRotationAxes = glGetUniformLocation(program, "rotationAxes");
 	uRotationProgress = glGetUniformLocation(program, "rotationProgress");
 }
 
@@ -74,14 +76,24 @@ void display() {
 	if (rotationProgress > 1.0f) 
 		rotationProgress = 1.0f;
 
-
 	// Let the vertex shader handle all the angle calculations
 	glUniform1f(uRotationProgress,rotationProgress);
+	/*
 	glUniform1iv(uPositions,NUM_CUBES,positions);
 	glUniform1iv(uRotations,NUM_CUBES,rotations);
-	glUniform1iv(uRotationsPrev,NUM_CUBES,rotationAxes);
+	glUniform1iv(uRotationAxes,NUM_CUBES,rotationAxes);
+	*/
 
 	// Draw 27 instanced cubes based on initial cube
+	for (int i=0; i<NUM_CUBES; i++) {
+		glUniform1i(uCubeId,i);
+		glUniform1i(uPositions,positions[i]);
+		glUniformMatrix4fv(uRotations,1,false,(GLfloat*) rotations[i]);
+		glUniform1i(uRotationAxes,rotationAxes[i]);
+		glDrawElements(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0); 
+	}
+
+/*
 	glDrawElementsInstanced(
 		GL_TRIANGLES, 
 		VERT_PER_CUBE, 
@@ -89,6 +101,7 @@ void display() {
 		0, 
 		NUM_CUBES
 	);
+	*/
 
 	glBindVertexArray(0);
 
@@ -182,8 +195,10 @@ int main(int argc, char *argv[]) {
 	
 	// Initialize cube positions array to default positions
 	// if positions[3] == 6, this means cube instance #6 is at position #3.
-	for (int i=0; i<NUM_CUBES; i++) 
+	for (int i=0; i<NUM_CUBES; i++) {
 		positions[i] = i;
+		rotations[i] = mat4(1);
+	}
 
 	glutMainLoop();
 	return 0;

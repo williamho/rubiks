@@ -5,7 +5,7 @@
 #define VERT_PER_CUBE 36
 #define CUBES_PER_PLANE 9
 #define NUM_CUBES 27
-#define ROTATION_DURATION 500
+#define ROTATION_DURATION 200
 
 #define INITIAL_ROTATION 45.0, 45.0, -45.0
 #define ROTATION_FACTOR  0.5
@@ -20,8 +20,8 @@ float calculateFPS();
 void rotateSlice(int cubes[], int axis, int n, bool isClockwise=true);
 
 extern int winWidth, winHeight;
-extern int positions[NUM_CUBES];
-extern GLint rotations[NUM_CUBES];
+extern GLint positions[NUM_CUBES];
+extern mat4 rotations[NUM_CUBES];
 extern GLint rotationAxes[NUM_CUBES];
 extern GLfloat rotationProgress;
 extern int rotationStartTime;

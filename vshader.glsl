@@ -6,17 +6,17 @@ uniform mat4 rotationMat; // Rotate the entire Rubik's cube
 uniform float scale;      // Scale the entire Rubik's cube
 uniform float rotationProgress;   // In the middle of a rotation, 0.0 to 1.0
 
-uniform int positions[27];     
+uniform int cubeId;
+uniform int positions;     
 
-// Arrays of bit-packed ints with individual sub-cube rotation info
-uniform int rotations[27];     
-uniform int rotationAxes[27];
+uniform mat4 rotations;     
+uniform int rotationAxes;
 
 /** Based on which sub-cube this is, determine color of this vertex */
 vec4 getColor() {
-	//int cubePosition = positions[gl_InstanceID];
-	//int cubePosition = gl_InstanceID;
-	int posNum = positions[gl_InstanceID];
+	int posNum = positions;
+	//int posNum = cubeId;
+	//int posNum = gl_InstanceID;
 	vec3 cubePosition = vec3(
 		posNum%3 - 1, 
 		(posNum%9)/3 - 1,
@@ -24,8 +24,8 @@ vec4 getColor() {
 	);
 
 	// DEBUG -------------------------
-	float tmp = (1.0/27)*posNum;
-	return vec4(tmp,tmp,tmp,1.0);
+	//float tmp = (1.0/27)*posNum;
+	//return vec4(tmp,tmp,tmp,1.0);
 	// -------------------------------
 
 	const vec4 faceColors[6] = {
@@ -47,6 +47,7 @@ vec4 getColor() {
 	return vec4(0.0, 0.0, 0.0, 1.0);
 }
 
+/*
 vec3 unpack(int packed) {
 	const int mask = 3;
 
@@ -56,10 +57,45 @@ vec3 unpack(int packed) {
 		(packed >> 4) & mask
 	);
 }
+*/
 
-/** Based on which sub-cube this is, determine the angle of rotation */
-mat4 getRotation() {
-	int r = rotationAxes[gl_InstanceID];
+mat4 rotateX(float angleRadians) {
+	float c = cos(angleRadians);
+	float s = sin(angleRadians);
+	return mat4( 
+		1.0,  0.0,  0.0,  0.0,
+		0.0,    c,    s,  0.0,
+		0.0,   -s,    c,  0.0,
+		0.0,  0.0,  0.0,  1.0 
+	);
+}
+
+mat4 rotateY(float angleRadians) {
+	float c = cos(angleRadians);
+	float s = sin(angleRadians);
+
+	return mat4( 
+		  c,  0.0,   -s,  0.0,
+		0.0,  1.0,  0.0,  0.0,
+		  s,  0.0,    c,  0.0,
+		0.0,  0.0,  0.0,  1.0 
+	);
+}
+
+mat4 rotateZ(float angleRadians) {
+	float c = cos(angleRadians);
+	float s = sin(angleRadians);
+
+	return mat4( 
+		  c,   -s,  0.0,  0.0,
+		  s,    c,  0.0,  0.0,
+		0.0,  0.0,  1.0,  0.0,
+		0.0,  0.0,  0.0,  1.0 
+	);
+}
+
+mat4 getSliceRotation() {
+	int r = rotationAxes;
 	if (rotationProgress >= 1.0f || r == 0)
 		return mat4(1);
 	int rotationAxis = (r < 0 ? -r : r) - 1;
@@ -71,51 +107,59 @@ mat4 getRotation() {
 
 	float radiansCurr = mix(radians(rotationAngle), 0, rotationProgress);
 
-	float c = cos(radiansCurr);
-	float s = sin(radiansCurr);
-
 	switch(rotationAxis) {
 	case 0: // Rotate about x axis
-		return mat4( 
-			1.0,  0.0,  0.0,  0.0,
-			0.0,    c,    s,  0.0,
-			0.0,   -s,    c,  0.0,
-			0.0,  0.0,  0.0,  1.0 
-		);
+		return rotateX(radiansCurr);
 	case 1: // Rotate about y axis
-		return mat4( 
-			  c,  0.0,   -s,  0.0,
-			0.0,  1.0,  0.0,  0.0,
-			  s,  0.0,    c,  0.0,
-			0.0,  0.0,  0.0,  1.0 
-		);
+		return rotateY(radiansCurr);
 	case 2: // Rotate about z axis
-		return mat4( 
-			  c,   -s,  0.0,  0.0,
-			  s,    c,  0.0,  0.0,
-			0.0,  0.0,  1.0,  0.0,
-			0.0,  0.0,  0.0,  1.0 
-		);
+		return rotateZ(radiansCurr);
 	}
 }
 
+// TESTING???
+mat4 getCubeRotation() {
+	return rotations;
+	int r = rotationAxes;
+	if (rotationProgress < 1.0f || r == 0)
+		return mat4(1);
+	int rotationAxis = (r < 0 ? -r : r) - 1;
+	int rotationAngle = (r < 0 ? -90 : 90);
+
+	float radiansCurr = radians(rotationAngle);
+
+	mat4 rm;	
+	switch(rotationAxis) {
+	case 0: // Rotate about x axis
+		rm = rotateX(radiansCurr); 
+		break;
+	case 1: // Rotate about y axis
+		rm = rotateY(radiansCurr); 
+		break;
+	case 2: // Rotate about z axis
+		rm = rotateZ(radiansCurr); 
+		break;
+	}
+
+	return rm * rotations;
+}
+
 void main() {
+	if (rotationAxes != 0)
+		vPosition = getCubeRotation() * vPosition;
+
 	// Position the cube based on gl_InstanceID
-	vec4 cubeOffset = vec4(
-		gl_InstanceID%3 - 1, 
-		(gl_InstanceID%9)/3 - 1,
-		gl_InstanceID/9 - 1,
+	vPosition += 1.05 * vec4(
+		cubeId%3 - 1, 
+		(cubeId%9)/3 - 1,
+		cubeId/9 - 1,
 		1.0
 	);
 
-	//if (rotationProgress >= 1.0f)
-		//vPosition = getRotation() * vPosition;
-
-	vPosition += cubeOffset*1.05; // Leave some space between sub-cubes
 	vPosition.xyz *= scale;
 
 	if (rotationProgress < 1.0f)
-		vPosition = getRotation() * vPosition;
+		vPosition = getSliceRotation() * vPosition;
 
 	color = getColor();
 	gl_Position = rotationMat * vPosition;
