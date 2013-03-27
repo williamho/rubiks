@@ -114,6 +114,12 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'q': 
 		exit( EXIT_SUCCESS );
 		break;
+	case 's':
+		saveState("savestate.rubiks");
+		break;
+	case 'l':
+		loadState("savestate.rubiks");
+		break;
 	case '!': key = 1; break;
 	case '@': key = 2; break;
 	case '#': key = 3; break;

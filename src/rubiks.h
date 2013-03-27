@@ -26,7 +26,6 @@ void keyboard(unsigned char key, int x, int y);
 void mouseButton(int button, int state, int x, int y);
 void mouseMotion(int x, int y);
 
-
 void createVBO();
 float calculateFPS();
 void rotateSlice(int cubes[], int axis, int n, bool isClockwise=true);
@@ -34,12 +33,15 @@ void randomRotations(int numRotations);
 void initColors();
 void updateCubes();
 
+void saveState(char *filename);
+void loadState(char *filename);
+
 extern int winWidth, winHeight;
 extern GLint positions[NUM_CUBES];
 extern GLint rotationAxes[NUM_CUBES];
 extern GLfloat rotationProgress;
-extern int rotationStartTime;
 extern GLint colors[NUM_CUBES][FACES_PER_CUBE];
+extern int rotationStartTime;
 extern bool finishedRotating;
 
 #define IS_ROTATING (rotationProgress < 1.0f)
