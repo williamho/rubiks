@@ -1,4 +1,5 @@
 #include <Angel.h>
+#include <iostream>
 #include <cstdlib>
 #include "rubiks.h"
 
@@ -35,20 +36,6 @@ void rotateSlice(int cubes[], int axis, int n, bool isClockwise) {
 	finishedRotating = false;
 
 	int sliceNum = axis*3 + n;
-	const int planes[9][9] = { // Positions on the cube that correspond to planes
-		// Planes x=0 to x=2
-		{  0,  3,  6,  9, 12, 15, 18, 21, 24},
-		{  1,  4,  7, 10, 13, 16, 19, 22, 25},
-		{  2,  5,  8, 11, 14, 17, 20, 23, 26},
-		// Planes y=0 to y=2
-		{  0,  1,  2,  9, 10, 11, 18, 19, 20},
-		{  3,  4,  5, 12, 13, 14, 21, 22, 23},
-		{  6,  7,  8, 15, 16, 17, 24, 25, 26},
-		// Planes z=0 to z=2
-		{  0,  1,  2,  3,  4,  5,  6,  7,  8}, 
-		{  9, 10, 11, 12, 13, 14, 15, 16, 17},
-		{ 18, 19, 20, 21, 22, 23, 24, 25, 26},
-	};
 
 	/*              Rotating a face:
 	     0 1 2    6 3 0        0 1 2    2 5 8
@@ -82,6 +69,9 @@ void updateCubes() {
 		positions[lastRotationCubesBefore[i]] = lastRotationCubesAfter[i];
 	}
 	finishedRotating = true;
+
+	if (isSolved())
+		std::cout << "Rubik's cube solved!" << std::endl;
 }
 
 void randomRotations(int numRotations) {
@@ -89,7 +79,7 @@ void randomRotations(int numRotations) {
 		int r = rand() % NUM_PLANES;
 		rotateSlice(positions,r/3,r%3,rand()%2);
 		rotationProgress = 1.0f;
-		display();
+		updateRotationProgress();
 	} 
 }
 

@@ -25,6 +25,7 @@ void display();
 void keyboard(unsigned char key, int x, int y);
 void mouseButton(int button, int state, int x, int y);
 void mouseMotion(int x, int y);
+void updateRotationProgress();
 
 void createVBO();
 float calculateFPS();
@@ -35,6 +36,7 @@ void updateCubes();
 
 void saveState(char *filename);
 void loadState(char *filename);
+bool isSolved();
 
 extern int winWidth, winHeight;
 extern GLint positions[NUM_CUBES];
@@ -43,6 +45,21 @@ extern GLfloat rotationProgress;
 extern GLint colors[NUM_CUBES][FACES_PER_CUBE];
 extern int rotationStartTime;
 extern bool finishedRotating;
+
+const int planes[9][9] = { // Positions on the cube that correspond to planes
+	// Planes x=-1 to x=+1
+	{  0,  3,  6,  9, 12, 15, 18, 21, 24},
+	{  1,  4,  7, 10, 13, 16, 19, 22, 25},
+	{  2,  5,  8, 11, 14, 17, 20, 23, 26},
+	// Planes y=-1 to y=+1
+	{  0,  1,  2,  9, 10, 11, 18, 19, 20},
+	{  3,  4,  5, 12, 13, 14, 21, 22, 23},
+	{  6,  7,  8, 15, 16, 17, 24, 25, 26},
+	// Planes z=-1 to z=+1
+	{  0,  1,  2,  3,  4,  5,  6,  7,  8}, 
+	{  9, 10, 11, 12, 13, 14, 15, 16, 17},
+	{ 18, 19, 20, 21, 22, 23, 24, 25, 26},
+};
 
 #define IS_ROTATING (rotationProgress < 1.0f)
 

@@ -1,6 +1,7 @@
 #include <Angel.h>
 #include <iostream>
 #include <ctime>
+#include <cstdlib>
 #include "rubiks.h"
 
 GLuint vao, vbo, ibo;
@@ -57,13 +58,6 @@ void init() {
 
 	glutPostRedisplay();
 	glutSwapBuffers();
-
-	// Get random rotations
-	srand(time(0));
-	int numRotations;
-	std::cout << "Number of random rotations: ";
-	std::cin >> numRotations; 
-	randomRotations(numRotations);
 }
 
 // TODO: keep aspect ratio of cube if window size is not square
@@ -71,6 +65,15 @@ void reshape (int w, int h) {
 	glViewport(0, 0, w, h);
 	winWidth = w;
 	winHeight = h;
+}
+
+void updateRotationProgress() {
+	if (IS_ROTATING) 
+		rotationProgress = ((float)glutGet(GLUT_ELAPSED_TIME)-rotationStartTime)/ROTATION_DURATION;
+	if (rotationProgress >= 1.0f && !finishedRotating) {
+		rotationProgress = 1.0f;
+		updateCubes();
+	}
 }
 
 void display() {
@@ -84,12 +87,7 @@ void display() {
 	glUniformMatrix4fv(uRotationMat, 1, 0, rotationMat);
 	glUniform1f(uScale,scale);
 
-	if (IS_ROTATING) 
-		rotationProgress = ((float)glutGet(GLUT_ELAPSED_TIME)-rotationStartTime)/ROTATION_DURATION;
-	if (rotationProgress >= 1.0f && !finishedRotating) {
-		rotationProgress = 1.0f;
-		updateCubes();
-	}
+	updateRotationProgress();
 
 	// Let the vertex shader handle all the angle calculations
 	glUniform1f(uRotationProgress,rotationProgress);
@@ -112,13 +110,16 @@ void keyboard(unsigned char key, int x, int y) {
 	switch(key) {
 	case 033: // Esc
 	case 'q': 
-		exit( EXIT_SUCCESS );
+		exit(EXIT_SUCCESS);
 		break;
 	case 's':
 		saveState("savestate.rubiks");
 		break;
 	case 'l':
 		loadState("savestate.rubiks");
+		break;
+	case 'r':
+		rotationMat = mat4();
 		break;
 	case '!': key = 1; break;
 	case '@': key = 2; break;
@@ -177,9 +178,9 @@ void mouseMotion(int x, int y) {
 
 void idle() {
 	// DEBUG: Display framerate in window title
-	//static char windowTitle[20]; 
-	//sprintf(windowTitle, "%.1f", calculateFPS());
-	//glutSetWindowTitle(windowTitle);
+	static char windowTitle[20]; 
+	sprintf(windowTitle, "%.1f", calculateFPS());
+	glutSetWindowTitle(windowTitle);
 
 	glutPostRedisplay();
 }
@@ -216,6 +217,16 @@ int main(int argc, char *argv[]) {
 	glutMouseFunc(mouseButton);
 	glutMotionFunc(mouseMotion);
 	glutIdleFunc(idle);
+
+	srand(time(0));
+	long numRotations;
+	if (argc > 1) {
+		numRotations = strtol(argv[1],0,10);
+		if (errno == ERANGE) 
+			std::cerr << "Invalid argument" << std::endl;
+		else 
+			randomRotations(numRotations);
+	}
 
 	glutMainLoop();
 	return 0;
