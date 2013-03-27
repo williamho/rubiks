@@ -1,4 +1,6 @@
 #include <Angel.h>
+#include <iostream>
+#include <ctime>
 #include "rubiks.h"
 
 GLuint vao, vbo, ibo;
@@ -52,6 +54,16 @@ void init() {
 	uColors = glGetUniformLocation(program, "colors");
 	uRotationAxes = glGetUniformLocation(program, "rotationAxes");
 	uRotationProgress = glGetUniformLocation(program, "rotationProgress");
+
+	glutPostRedisplay();
+	glutSwapBuffers();
+
+	// Get random rotations
+	srand(time(0));
+	int numRotations;
+	std::cout << "Number of random rotations: ";
+	std::cin >> numRotations; 
+	randomRotations(numRotations);
 }
 
 // TODO: keep aspect ratio of cube if window size is not square
@@ -167,6 +179,19 @@ void idle() {
 }
 
 int main(int argc, char *argv[]) {
+	// Set up rotation matrix for entire scene
+	rotationMat = mat4();
+	vec3 r(INITIAL_ROTATION);
+	rotationMat *= RotateX(r[0]);
+	rotationMat *= RotateY(r[1]);
+	rotationMat *= RotateZ(-r[2]);
+	
+	// Initialize cube positions array to default positions
+	// if positions[3] == 6, this means cube instance #6 is at position #3.
+	for (int i=0; i<NUM_CUBES; i++) 
+		positions[i] = i;
+	initColors();
+
 	// Initialize window 
 	glutInit(&argc, argv);
 	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
@@ -185,20 +210,6 @@ int main(int argc, char *argv[]) {
 	glutMouseFunc(mouseButton);
 	glutMotionFunc(mouseMotion);
 	glutIdleFunc(idle);
-
-	// Set up rotation matrix for entire scene
-	rotationMat = mat4();
-	vec3 r(INITIAL_ROTATION);
-	rotationMat *= RotateX(r[0]);
-	rotationMat *= RotateY(r[1]);
-	rotationMat *= RotateZ(-r[2]);
-	
-	// Initialize cube positions array to default positions
-	// if positions[3] == 6, this means cube instance #6 is at position #3.
-	for (int i=0; i<NUM_CUBES; i++) 
-		positions[i] = i;
-
-	initColors();
 
 	glutMainLoop();
 	return 0;

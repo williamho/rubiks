@@ -1,4 +1,5 @@
 #include <Angel.h>
+#include <cstdlib>
 #include "rubiks.h"
 
 int lastRotationAxis, lastRotationWasClockwise;
@@ -81,5 +82,14 @@ void updateCubes() {
 		positions[lastRotationCubesBefore[i]] = lastRotationCubesAfter[i];
 	}
 	finishedRotating = true;
+}
+
+void randomRotations(int numRotations) {
+	for (int i=0; i<numRotations; i++) {
+		int r = rand() % NUM_PLANES;
+		rotateSlice(positions,r/3,r%3,rand()%2);
+		rotationProgress = 1.0f;
+		display();
+	} 
 }
 

@@ -7,6 +7,7 @@
 #define FACES_PER_CUBE 6
 #define CUBES_PER_PLANE 9
 #define NUM_CUBES 27
+#define NUM_PLANES 9
 #define ROTATION_DURATION 200
 
 #define INITIAL_ROTATION 45.0, 45.0, -45.0
@@ -17,9 +18,19 @@
 #define MAX_SCALE        0.75
 #define SCALE_FACTOR     0.05
 
+void display();
+void init();
+void reshape (int w, int h);
+void display();
+void keyboard(unsigned char key, int x, int y);
+void mouseButton(int button, int state, int x, int y);
+void mouseMotion(int x, int y);
+
+
 void createVBO();
 float calculateFPS();
 void rotateSlice(int cubes[], int axis, int n, bool isClockwise=true);
+void randomRotations(int numRotations);
 void initColors();
 void updateCubes();
 
