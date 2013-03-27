@@ -159,24 +159,23 @@ void mouseMotion(int x, int y) {
 
 void idle() {
 	// DEBUG: Display framerate in window title
-	static char windowTitle[20]; 
-	sprintf(windowTitle, "%.1f", calculateFPS());
-	glutSetWindowTitle(windowTitle);
+	//static char windowTitle[20]; 
+	//sprintf(windowTitle, "%.1f", calculateFPS());
+	//glutSetWindowTitle(windowTitle);
 
 	glutPostRedisplay();
 }
 
 int main(int argc, char *argv[]) {
-	glewExperimental = GL_TRUE;
-
 	// Initialize window 
 	glutInit(&argc, argv);
-	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE);
+	glutInitDisplayMode(GLUT_RGBA | GLUT_DOUBLE | GLUT_DEPTH);
 	glutInitWindowSize(winWidth, winHeight);
-	glutInitContextVersion(3, 1);
+	glutInitContextVersion(3, 2);
 	glutInitContextProfile(GLUT_CORE_PROFILE);
 	glutCreateWindow("Rubik's Cube");
 	
+	glewExperimental = GL_TRUE;
 	glewInit();
 	init();
 

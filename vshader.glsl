@@ -14,14 +14,14 @@ uniform int colors[6];
 
 /** Based on which sub-cube this is, determine color of this vertex */
 vec4 getColor() {
-	const vec4 faceColors[6] = {
+	const vec4 faceColors[6] = vec4[] (
 		vec4(1.0, 0.5, 0.0, 1.0), // Left   (-x) Orange
 		vec4(1.0, 0.0, 0.0, 1.0), // Right  (+x) Red
 		vec4(0.0, 1.0, 0.0, 1.0), // Bottom (-y) Green
 		vec4(1.0, 1.0, 0.0, 1.0), // Top    (+y) Yellow
 		vec4(0.0, 0.0, 1.0, 1.0), // Back   (-z) Blue
-		vec4(1.0, 1.0, 1.0, 1.0), // Front  (+z) White
-	};
+		vec4(1.0, 1.0, 1.0, 1.0)  // Front  (+z) White
+	);
 
 	int colorIndex = colors[gl_VertexID/4];
 	if (colorIndex >= 0)
@@ -76,7 +76,7 @@ mat4 getSliceRotation() {
 	if (rotationAxis != 0)
 		rotationAngle *= -1;
 
-	float radiansCurr = mix(0, radians(rotationAngle), rotationProgress);
+	float radiansCurr = mix(0, radians(float(rotationAngle)), rotationProgress);
 
 	switch(rotationAxis) {
 	case 0: return rotateX(radiansCurr);
@@ -86,20 +86,21 @@ mat4 getSliceRotation() {
 }
 
 void main() {
-	vPosition += 1.05 * vec4(
+	vec4 p = vPosition;
+	p += 1.05 * vec4(
 		cubeId%3 - 1, 
 		(cubeId%9)/3 - 1,
 		cubeId/9 - 1,
 		1.0
 	);
 
-	vPosition.xyz *= scale;
+	p.xyz *= scale;
 
 	if (rotationProgress < 1.0f)
-		vPosition = getSliceRotation() * vPosition;
+		p = getSliceRotation() * p;
 	color = getColor();
 
-	gl_Position = rotationMat * vPosition;
+	gl_Position = rotationMat * p;
 	gl_Position.z *= -1;
 } 
 
