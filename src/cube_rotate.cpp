@@ -8,12 +8,13 @@ int lastRotationCubesBefore[CUBES_PER_PLANE],  // indices
     lastRotationCubesAfter[CUBES_PER_PLANE];   // cube IDs
 int newCubeColors[CUBES_PER_PLANE][FACES_PER_CUBE];
 
+/** Rotate the colors on the faces of each subcube */
 void addRotation(int cubeNum, int axis, bool isClockwise=true) {
-	const int cwX[] = {0,1,4,5,3,2};
+	const int cwX[]  = {0,1,4,5,3,2};
 	const int ccwX[] = {0,1,5,4,2,3};
-	const int cwY[] = {4,5,2,3,1,0};
+	const int cwY[]  = {4,5,2,3,1,0};
 	const int ccwY[] = {5,4,2,3,0,1};
-	const int cwZ[] = {2,3,1,0,4,5};
+	const int cwZ[]  = {2,3,1,0,4,5};
 	const int ccwZ[] = {3,2,0,1,4,5};
 	const int *rotate;
 
@@ -22,6 +23,7 @@ void addRotation(int cubeNum, int axis, bool isClockwise=true) {
 	case 1: rotate = isClockwise ? cwY : ccwY; break;
 	case 2: rotate = isClockwise ? cwZ : ccwZ; break;
 	}
+
 	int newColors[FACES_PER_CUBE];
 	for (int i = 0; i < FACES_PER_CUBE; i++)
 		newColors[rotate[i]] = colors[cubeNum][i];
@@ -30,6 +32,7 @@ void addRotation(int cubeNum, int axis, bool isClockwise=true) {
 
 }
 
+/** Rotate a 'slice' (plane) of the Rubik's cube */
 void rotateSlice(int cubes[], int axis, int n, bool isClockwise) {
 	if (!finishedRotating) // Current rotation not done. Do nothing.
 		return;
@@ -46,8 +49,10 @@ void rotateSlice(int cubes[], int axis, int n, bool isClockwise) {
 	const int newIndicesCCW[CUBES_PER_PLANE] = {2,5,8,1,4,7,0,3,6};
 	const int *newIndices = isClockwise ? newIndicesCW : newIndicesCCW;
 
+	// Unset previously-set rotation
 	memset(rotationAxes, 0, sizeof(rotationAxes)); 
 
+	// Store info about each subcube's rotation and color data
 	for (int i=0; i<CUBES_PER_PLANE; i++) {
 		lastRotationCubesBefore[i] = planes[sliceNum][i];
 		lastRotationCubesAfter[i] = cubes[planes[sliceNum][newIndices[i]]];
@@ -61,6 +66,8 @@ void rotateSlice(int cubes[], int axis, int n, bool isClockwise) {
 	lastRotationWasClockwise = isClockwise;
 }
 
+/** After the slice is done rotating, replace the original cubes with the new 
+	cubes by changing the colors */
 void updateCubes() {
 	for (int i=0; i<CUBES_PER_PLANE; i++)
 		memcpy(colors[lastRotationCubesBefore[i]],newCubeColors[i],sizeof(colors[0]));
@@ -74,6 +81,7 @@ void updateCubes() {
 		std::cout << "Rubik's cube solved!" << std::endl;
 }
 
+/** Rotate random slices of the Rubik's cube */
 void randomRotations(int numRotations) {
 	for (int i=0; i<numRotations; i++) {
 		int r = rand() % NUM_PLANES;

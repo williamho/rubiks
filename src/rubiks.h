@@ -8,7 +8,7 @@
 #define CUBES_PER_PLANE 9
 #define NUM_CUBES 27
 #define NUM_PLANES 9
-#define ROTATION_DURATION 200
+#define ROTATION_DURATION 200 // Milliseconds
 
 #define INITIAL_ROTATION 45.0, 45.0, -45.0
 #define ROTATION_FACTOR  0.5
@@ -16,8 +16,9 @@
 #define INITIAL_SCALE    0.5
 #define MIN_SCALE        0.05
 #define MAX_SCALE        0.75
-#define SCALE_FACTOR     0.05
+#define SCALE_FACTOR     0.05 // Amount to zoom in/out for each scroll wheel tick
 
+// Function prototypes (could split these into multiple header files)
 void display();
 void init();
 void reshape (int w, int h);
@@ -38,6 +39,7 @@ void saveState(char *filename);
 void loadState(char *filename);
 bool isSolved();
 
+// Globals
 extern int winWidth, winHeight;
 extern GLint positions[NUM_CUBES];
 extern GLint rotationAxes[NUM_CUBES];
@@ -46,7 +48,8 @@ extern GLint colors[NUM_CUBES][FACES_PER_CUBE];
 extern int rotationStartTime;
 extern bool finishedRotating;
 
-const int planes[9][9] = { // Positions on the cube that correspond to planes
+// Positions on the cube that correspond to planes
+const int planes[9][9] = { 
 	// Planes x=-1 to x=+1
 	{  0,  3,  6,  9, 12, 15, 18, 21, 24},
 	{  1,  4,  7, 10, 13, 16, 19, 22, 25},

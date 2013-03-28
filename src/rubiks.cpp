@@ -48,6 +48,7 @@ void init() {
 	glDepthFunc(GL_LEQUAL);
 	glDepthRange(0.0f, 1.0f);
 
+	// Set up uniform variables
 	uRotationMat = glGetUniformLocation(program, "rotationMat");
 	uScale = glGetUniformLocation(program, "scale");
 	uPositions = glGetUniformLocation(program, "positions");
@@ -67,6 +68,7 @@ void reshape (int w, int h) {
 	winHeight = h;
 }
 
+/** Check if the cube is still rotating. If it just finished, update the cubes. */
 void updateRotationProgress() {
 	if (IS_ROTATING) 
 		rotationProgress = ((float)glutGet(GLUT_ELAPSED_TIME)-rotationStartTime)/ROTATION_DURATION;
@@ -121,6 +123,14 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'r':
 		rotationMat = mat4();
 		break;
+	case 'a':
+		rotationMat = RotateZ(ROTATION_FACTOR)*rotationMat;
+		break;
+	case 'd':
+		rotationMat = RotateZ(-ROTATION_FACTOR)*rotationMat;
+		break;
+	
+	// Shift + number keys
 	case '!': key = 1; break;
 	case '@': key = 2; break;
 	case '#': key = 3; break;

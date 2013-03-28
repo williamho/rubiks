@@ -23,6 +23,8 @@ vec4 getColor() {
 		vec4(1.0, 1.0, 1.0, 1.0)  // Front  (+z) White
 	);
 
+	// There are 24 vertices per cube, and each group of 4 vertices defines a face
+	// Thus, gl_VertexID/4 (int division) will give the face the vertex belongs to
 	int colorIndex = colors[gl_VertexID/4];
 	if (colorIndex >= 0)
 		return faceColors[colorIndex];
@@ -65,9 +67,11 @@ mat4 rotateZ(float angleRadians) {
 	);
 }
 
+/** Based on the rotationProgress, interpolate between 0 and 90 degrees
+	of rotation for the specified 'slice' (plane) of the Rubik's cube */
 mat4 getSliceRotation() {
 	int r = rotationAxes;
-	if (rotationProgress >= 1.0f || r == 0)
+	if (rotationProgress >= 1.0f || r == 0) // This subcube not rotating
 		return mat4(1);
 	int rotationAxis = (r < 0 ? -r : r) - 1;
 	int rotationAngle = (r < 0 ? -90 : 90);
@@ -87,7 +91,9 @@ mat4 getSliceRotation() {
 
 void main() {
 	vec4 p = vPosition;
-	p += 1.05 * vec4(
+
+	// Position each subcube based on its cubeId, leave some space between
+	p += 1.05 * vec4(	
 		cubeId%3 - 1, 
 		(cubeId%9)/3 - 1,
 		cubeId/9 - 1,
@@ -96,10 +102,12 @@ void main() {
 
 	p.xyz *= scale;
 
+	// If a slice of the Rubik's cube is rotating, get the rotation matrix
 	if (rotationProgress < 1.0f)
 		p = getSliceRotation() * p;
 	color = getColor();
 
+	// Rotate the entire Rubik's cube
 	gl_Position = rotationMat * p;
 	gl_Position.z *= -1;
 } 
