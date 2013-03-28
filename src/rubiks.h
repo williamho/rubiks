@@ -11,7 +11,8 @@
 #define ROTATION_DURATION 200 // Milliseconds
 
 #define INITIAL_ROTATION 45.0, 45.0, -45.0
-#define ROTATION_FACTOR  0.5
+#define ROTATION_FACTOR_MOUSE  0.5
+#define ROTATION_FACTOR_KEYBOARD 4.0
 
 #define INITIAL_SCALE    0.5
 #define MIN_SCALE        0.05

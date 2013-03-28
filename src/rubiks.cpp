@@ -81,7 +81,7 @@ void updateRotationProgress() {
 void display() {
 	glClearColor(0.5, 0.5, 0.5, 1.0);
 	glClearDepth(1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
 
 	glBindVertexArray(vao);
 
@@ -114,20 +114,28 @@ void keyboard(unsigned char key, int x, int y) {
 	case 'q': 
 		exit(EXIT_SUCCESS);
 		break;
-	case 's':
+	case 'w': // Write
 		saveState("savestate.rubiks");
 		break;
-	case 'l':
+	case 'e': // Edit
 		loadState("savestate.rubiks");
 		break;
-	case 'r':
+	case 'r': // Reset
 		rotationMat = mat4();
 		break;
-	case 'a':
-		rotationMat = RotateZ(ROTATION_FACTOR)*rotationMat;
+
+	// Scene rotation with arrow keys
+	case 'k':
+		rotationMat *= RotateX(ROTATION_FACTOR_KEYBOARD);
 		break;
-	case 'd':
-		rotationMat = RotateZ(-ROTATION_FACTOR)*rotationMat;
+	case 'j':
+		rotationMat *= RotateX(-ROTATION_FACTOR_KEYBOARD);
+		break;
+	case 'l':
+		rotationMat *= RotateZ(ROTATION_FACTOR_KEYBOARD);
+		break;
+	case 'h':
+		rotationMat *= RotateZ(-ROTATION_FACTOR_KEYBOARD);
 		break;
 	
 	// Shift + number keys
@@ -179,7 +187,7 @@ void mouseMotion(int x, int y) {
 	// If right mouse pressed, changes in mouse position will rotate scene
 	if(rightMousePressed) {
 		vec2 d = mousePos - mousePosPrev;
-		d *= -ROTATION_FACTOR;
+		d *= -ROTATION_FACTOR_MOUSE;
 		rotationMat *= RotateY(d[0]);
 		rotationMat *= RotateX(d[1]);
 		mousePosPrev = mousePos;
@@ -188,9 +196,9 @@ void mouseMotion(int x, int y) {
 
 void idle() {
 	// DEBUG: Display framerate in window title
-	static char windowTitle[20]; 
-	sprintf(windowTitle, "%.1f", calculateFPS());
-	glutSetWindowTitle(windowTitle);
+	//static char windowTitle[20]; 
+	//sprintf(windowTitle, "%.1f", calculateFPS());
+	//glutSetWindowTitle(windowTitle);
 
 	glutPostRedisplay();
 }
