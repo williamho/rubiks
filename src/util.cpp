@@ -32,6 +32,7 @@ void saveState(char *filename) {
 	std::fstream file(filename, std::ios::out | std::ios::binary);
 	file.write((char *)positions, sizeof(positions));
 	file.write((char *)colors, sizeof(colors));
+	std::cout << "Rubik's cube data saved as " << filename << std::endl;
 	file.close();
 }
 
@@ -46,6 +47,7 @@ void loadState(char *filename) {
 	file.seekg(0);
 	file.read((char *)positions, sizeof(positions));
 	file.read((char *)colors, sizeof(colors));
+	std::cout << "Rubik's cube data loaded from " << filename << std::endl;
 	file.close();
 }
 
@@ -77,5 +79,13 @@ bool isSolved() {
 			return false;
 	}
 	return true;	
+}
+
+bool cubeIsSelected(int cubeNum) {
+	for (int i=0; i<selectedCubesIndex; i++) {
+		if (selectedCubes[i] == cubeNum)
+			return true;
+	}
+	return false;
 }
 

@@ -9,6 +9,7 @@
 #define NUM_CUBES 27
 #define NUM_PLANES 9
 #define ROTATION_DURATION 200 // Milliseconds
+#define MAX_SELECTED_CUBES 3
 
 #define INITIAL_ROTATION 45.0, 45.0, -45.0
 #define ROTATION_FACTOR_MOUSE  0.5
@@ -31,6 +32,7 @@ void updateRotationProgress();
 
 void createVBO();
 float calculateFPS();
+int findPlane(int cubes[MAX_SELECTED_CUBES]);
 void rotateSlice(int cubes[], int axis, int n, bool isClockwise=true);
 void randomRotations(int numRotations);
 void initColors();
@@ -39,15 +41,19 @@ void updateCubes();
 void saveState(char *filename);
 void loadState(char *filename);
 bool isSolved();
+bool cubeIsSelected(int cubeNum);
 
 // Globals
 extern int winWidth, winHeight;
 extern GLint positions[NUM_CUBES];
 extern GLint rotationAxes[NUM_CUBES];
 extern GLfloat rotationProgress;
+extern GLint lineColors[FACES_PER_CUBE];
 extern GLint colors[NUM_CUBES][FACES_PER_CUBE];
 extern int rotationStartTime;
 extern bool finishedRotating;
+extern int selectedCubesIndex;
+extern GLint selectedCubes[MAX_SELECTED_CUBES];
 
 // Positions on the cube that correspond to planes
 const int planes[9][9] = { 

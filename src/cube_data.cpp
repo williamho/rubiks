@@ -81,8 +81,9 @@ int getColor(int posNum, int faceId) {
 
 /** Initialize the colors for a solved Rubik's cube */
 void initColors() {
-	for (int c=0; c<NUM_CUBES; c++) {
-		for (int f=0; f<FACES_PER_CUBE; f++) {
+	for (int f=0; f<FACES_PER_CUBE; f++) {
+		lineColors[f] = -1;
+		for (int c=0; c<NUM_CUBES; c++) {
 			colors[c][f] = getColor(c,f);
 		}
 	}

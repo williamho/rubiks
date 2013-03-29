@@ -10,14 +10,18 @@ GLuint uRotationMat, uScale, uRotationAxes,
 mat4 rotationMat;
 GLfloat scale = INITIAL_SCALE;
 GLint colors[NUM_CUBES][FACES_PER_CUBE];
+GLint lineColors[FACES_PER_CUBE];
 GLint rotationAxes[NUM_CUBES];
 GLint cubeId;
 GLint positions[NUM_CUBES];
-GLfloat rotationProgress = 1.0f;
+int selectedCubesIndex;
+GLint selectedCubes[MAX_SELECTED_CUBES];
+GLfloat rotationProgress = 1.0;
 bool finishedRotating=true;
 int rotationStartTime;
 
 vec2 mousePosPrev;
+bool leftMousePressed;
 bool rightMousePressed;
 int winWidth = 640, winHeight = 640;
 
@@ -46,7 +50,7 @@ void init() {
 	glEnable(GL_DEPTH_TEST);
 	glDepthMask(GL_TRUE);
 	glDepthFunc(GL_LEQUAL);
-	glDepthRange(0.0f, 1.0f);
+	glDepthRange(0.0, 1.0);
 
 	// Set up uniform variables
 	uRotationMat = glGetUniformLocation(program, "rotationMat");
@@ -72,8 +76,8 @@ void reshape (int w, int h) {
 void updateRotationProgress() {
 	if (IS_ROTATING) 
 		rotationProgress = ((float)glutGet(GLUT_ELAPSED_TIME)-rotationStartTime)/ROTATION_DURATION;
-	if (rotationProgress >= 1.0f && !finishedRotating) {
-		rotationProgress = 1.0f;
+	if (rotationProgress >= 1.0 && !finishedRotating) {
+		rotationProgress = 1.0;
 		updateCubes();
 	}
 }
@@ -81,7 +85,7 @@ void updateRotationProgress() {
 void display() {
 	glClearColor(0.5, 0.5, 0.5, 1.0);
 	glClearDepth(1.0);
-	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_COLOR_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
 
 	glBindVertexArray(vao);
 
@@ -95,12 +99,29 @@ void display() {
 	glUniform1f(uRotationProgress,rotationProgress);
 
 	// Draw 27 cubes based on initial cube
+	glClearStencil(0);
+	glStencilMask(0xFF);
+	glEnable(GL_STENCIL_TEST);
+	glStencilOp(GL_KEEP, GL_KEEP, GL_REPLACE);
 	for (int i=0; i<NUM_CUBES; i++) {
+		// Stencil buffer:
+		// http://en.wikibooks.org/wiki/OpenGL_Programming/Object_selection
+		glStencilFunc(GL_ALWAYS, i+1, 0xFF); // i+1 because 0 is used for background
+
 		glUniform1i(uCubeId,i);
 		glUniform1i(uPositions,positions[i]);
 		glUniform1iv(uColors,FACES_PER_CUBE,colors[i]);
 		glUniform1i(uRotationAxes,rotationAxes[i]);
+		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDrawElements(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0); 
+
+		if (cubeIsSelected(i)) {
+			glStencilFunc(GL_NOTEQUAL, i+1, 0xFF);
+			glLineWidth(10);
+			glUniform1iv(uColors,FACES_PER_CUBE,lineColors);
+			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+			glDrawElements(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0); 
+		}
 	}
 
 	glBindVertexArray(0);
@@ -160,8 +181,25 @@ void keyboard(unsigned char key, int x, int y) {
 }
 
 void mouseButton(int button, int state, int x, int y) {
+	// Rotate slices of cube with left button
+	if(button == GLUT_LEFT_BUTTON) {
+		switch(state) {
+		case GLUT_DOWN:
+			leftMousePressed = true;
+			mousePosPrev = vec2(x,y);
+			break;
+		case GLUT_UP:
+			leftMousePressed = false;
+			if (selectedCubesIndex == MAX_SELECTED_CUBES) {
+			// TODO: rotate based on three clicked cubes
+			//rotateSlice(positions,index/3,index%3,false);
+			}
+			selectedCubesIndex = 0;
+			break;
+		}
+	}
 	// Rotate scene with right mouse 
-	if(button == GLUT_RIGHT_BUTTON) {
+	else if(button == GLUT_RIGHT_BUTTON) {
 		switch(state) {
 		case GLUT_DOWN:
 			mousePosPrev = vec2(x,y);
@@ -184,8 +222,18 @@ void mouseButton(int button, int state, int x, int y) {
 
 void mouseMotion(int x, int y) {
 	vec2 mousePos = vec2(x,y);
+	GLuint index;
+	if (leftMousePressed) {
+		glReadPixels(x, winHeight-y-1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+		index--;
+		if (selectedCubesIndex == 0 || 
+		    (selectedCubes[selectedCubesIndex-1] != index && 
+			 selectedCubesIndex < MAX_SELECTED_CUBES))
+			selectedCubes[selectedCubesIndex++] = index;
+	}
+
 	// If right mouse pressed, changes in mouse position will rotate scene
-	if(rightMousePressed) {
+	if (rightMousePressed) {
 		vec2 d = mousePos - mousePosPrev;
 		d *= -ROTATION_FACTOR_MOUSE;
 		rotationMat *= RotateY(d[0]);
