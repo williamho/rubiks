@@ -25,6 +25,9 @@
 #define CUBE_FACE(n) QUAD(4*n, 4*n+1, 4*n+2, 4*n+3)
 
 extern GLuint vbo, ibo;
+
+/** Create the main vertex buffer object and index buffer 
+	object for a single subcube*/
 void createVBO() {
 	// Vertices of the cube centered around the origin, one face per line
 	const GLfloat vertexData[] = {
@@ -36,6 +39,7 @@ void createVBO() {
 		CUBE_P1, CUBE_P0, CUBE_P3, CUBE_P2,
 	};
 
+	// The indices for each face in terms of the vertex data
 	const GLshort indexData[] = {
 		CUBE_FACE(0),  // Left   (-x)
 		CUBE_FACE(1),  // Right  (+x)
@@ -54,5 +58,34 @@ void createVBO() {
 	glGenBuffers(1, &ibo);
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indexData), indexData, GL_STATIC_DRAW);
+}
+
+/** Assuming a solved Rubik's cube, determine the color of the face of a 
+	specified subcube. */
+int getColor(int posNum, int faceId) {
+	vec3 cubePosition = vec3(
+		posNum%3 - 1, 
+		(posNum%9)/3 - 1,
+		posNum/9 - 1
+	);
+
+	// Determine which face of the Rubik's cube this sub-cube is part of
+	for (int i=0; i<6; i++) {
+		if (cubePosition[i/2] == i%2*2-1 && faceId == i)
+			return i;
+	}
+
+	// No matches found: this vertex is black
+	return -1;
+}
+
+/** Initialize the colors for a solved Rubik's cube */
+void initColors() {
+	for (int f=0; f<FACES_PER_CUBE; f++) {
+		lineColors[f] = -1;
+		for (int c=0; c<NUM_CUBES; c++) {
+			colors[c][f] = getColor(c,f);
+		}
+	}
 }
 
