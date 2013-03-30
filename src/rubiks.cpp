@@ -171,20 +171,12 @@ void keyboard(unsigned char key, int x, int y) {
 }
 
 void mouseButton(int button, int state, int x, int y) {
+	int index;
 	// Rotate slices of cube with left button
-	if(button == GLUT_LEFT_BUTTON) {
-		switch(state) {
-		case GLUT_DOWN:
-			mousePosPrev = vec2(x,y);
-			break;
-		case GLUT_UP:
-			vec4 mouseDiff(x-mousePosPrev[0], y-mousePosPrev[1], 0.0, 1.0);
-			vec4 motion = rotationMat * mouseDiff;
-			std::cout << maxVecIndex(motion) << std::endl;
-
-			//rotateSlice(positions,index/3,index%3,false);
-			break;
-		}
+	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+		glReadPixels(x, winHeight-y-1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+		index--;
+		rotateFaceFromCube(index);
 	}
 	// Rotate scene with right mouse 
 	else if(button == GLUT_RIGHT_BUTTON) {

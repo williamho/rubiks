@@ -34,6 +34,7 @@ void createVBO();
 float calculateFPS();
 int findPlane(int cubes[MAX_SELECTED_CUBES]);
 void rotateSlice(int cubes[], int axis, int n, bool isClockwise=true);
+void rotateFaceFromCube(int cubeNum);
 void randomRotations(int numRotations);
 void initColors();
 void updateCubes();

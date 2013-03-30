@@ -91,3 +91,15 @@ void randomRotations(int numRotations) {
 	} 
 }
 
+/** If a cube in the center of a face is clicked, rotate that face */
+void rotateFaceFromCube(int cubeNum) {
+	switch (cubeNum) {
+	case 4: rotateSlice(positions,2,0,true); break;
+	case 10: rotateSlice(positions,1,0,false); break;
+	case 12: rotateSlice(positions,0,0,true); break;
+	case 14: rotateSlice(positions,0,2,false); break;
+	case 16: rotateSlice(positions,1,2,true); break;
+	case 22: rotateSlice(positions,2,2,false); break;
+	}
+}
+
