@@ -34,8 +34,9 @@ void createVBO();
 float calculateFPS();
 int findPlane(int cubes[MAX_SELECTED_CUBES]);
 void rotateSlice(int cubes[], int axis, int n, bool isClockwise=true);
-void rotateFaceFromCube(int cubeNum);
+void rotateFaceFromCube(int cubeNum, bool isClockwise=true);
 void randomRotations(int numRotations);
+void resetRotationMatrix();
 void initColors();
 void updateCubes();
 
@@ -51,6 +52,7 @@ extern GLint rotationAxes[NUM_CUBES];
 extern GLfloat rotationProgress;
 extern GLint lineColors[FACES_PER_CUBE];
 extern GLint colors[NUM_CUBES][FACES_PER_CUBE];
+extern mat4 rotationMat;
 extern int rotationStartTime;
 extern bool finishedRotating;
 

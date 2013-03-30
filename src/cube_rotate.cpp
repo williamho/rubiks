@@ -8,6 +8,15 @@ int lastRotationCubesBefore[CUBES_PER_PLANE],  // indices
     lastRotationCubesAfter[CUBES_PER_PLANE];   // cube IDs
 int newCubeColors[CUBES_PER_PLANE][FACES_PER_CUBE];
 
+/** Reset the scene rotation */
+void resetRotationMatrix() {
+	rotationMat = mat4();
+	vec3 r(INITIAL_ROTATION);
+	rotationMat *= RotateX(r[0]);
+	rotationMat *= RotateY(r[1]);
+	rotationMat *= RotateZ(-r[2]);
+}
+
 /** Rotate the colors on the faces of each subcube */
 void addRotation(int cubeNum, int axis, bool isClockwise=true) {
 	const int cwX[]  = {0,1,4,5,3,2};
@@ -92,14 +101,14 @@ void randomRotations(int numRotations) {
 }
 
 /** If a cube in the center of a face is clicked, rotate that face */
-void rotateFaceFromCube(int cubeNum) {
+void rotateFaceFromCube(int cubeNum, bool isClockwise) {
 	switch (cubeNum) {
-	case 4: rotateSlice(positions,2,0,true); break;
-	case 10: rotateSlice(positions,1,0,false); break;
-	case 12: rotateSlice(positions,0,0,true); break;
-	case 14: rotateSlice(positions,0,2,false); break;
-	case 16: rotateSlice(positions,1,2,true); break;
-	case 22: rotateSlice(positions,2,2,false); break;
+	case  4: rotateSlice(positions,2,0,isClockwise); break;
+	case 10: rotateSlice(positions,1,0,!isClockwise); break;
+	case 12: rotateSlice(positions,0,0,isClockwise); break;
+	case 14: rotateSlice(positions,0,2,!isClockwise); break;
+	case 16: rotateSlice(positions,1,2,isClockwise); break;
+	case 22: rotateSlice(positions,2,2,!isClockwise); break;
 	}
 }
 

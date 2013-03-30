@@ -20,7 +20,7 @@ int rotationStartTime;
 
 vec2 mousePosPrev;
 bool leftMousePressed;
-bool rightMousePressed;
+bool middleMousePressed;
 int winWidth = 640, winHeight = 640;
 
 void init() {
@@ -132,7 +132,7 @@ void keyboard(unsigned char key, int x, int y) {
 		loadState("savestate.rubiks");
 		break;
 	case 'r': // Reset
-		rotationMat = mat4();
+		resetRotationMatrix();
 		break;
 
 	// Scene rotation with arrow keys
@@ -172,21 +172,27 @@ void keyboard(unsigned char key, int x, int y) {
 
 void mouseButton(int button, int state, int x, int y) {
 	int index;
-	// Rotate slices of cube with left button
-	if(button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
+	// Rotate slices of cube clockwise with left button
+	if (button == GLUT_LEFT_BUTTON && state == GLUT_DOWN) {
 		glReadPixels(x, winHeight-y-1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
 		index--;
-		rotateFaceFromCube(index);
+		rotateFaceFromCube(index, true);
 	}
-	// Rotate scene with right mouse 
-	else if(button == GLUT_RIGHT_BUTTON) {
+	// Rotate slices of cube clockwise with right button
+	else if (button == GLUT_RIGHT_BUTTON && state == GLUT_DOWN) {
+		glReadPixels(x, winHeight-y-1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
+		index--;
+		rotateFaceFromCube(index, false);
+	}
+	// Rotate scene with middle mouse click
+	else if (button == GLUT_MIDDLE_BUTTON) {
 		switch(state) {
 		case GLUT_DOWN:
 			mousePosPrev = vec2(x,y);
-			rightMousePressed = true;
+			middleMousePressed = true;
 			break;
 		case GLUT_UP:
-			rightMousePressed = false;
+			middleMousePressed = false;
 			break;
 		}
 	}
@@ -205,7 +211,7 @@ void mouseMotion(int x, int y) {
 	GLuint index;
 
 	// If right mouse pressed, changes in mouse position will rotate scene
-	if (rightMousePressed) {
+	if (middleMousePressed) {
 		vec2 d = mousePos - mousePosPrev;
 		d *= -ROTATION_FACTOR_MOUSE;
 		rotationMat *= RotateY(d[0]);
@@ -215,21 +221,12 @@ void mouseMotion(int x, int y) {
 }
 
 void idle() {
-	// DEBUG: Display framerate in window title
-	//static char windowTitle[20]; 
-	//sprintf(windowTitle, "%.1f", calculateFPS());
-	//glutSetWindowTitle(windowTitle);
-
 	glutPostRedisplay();
 }
 
 int main(int argc, char *argv[]) {
 	// Set up rotation matrix for entire scene
-	rotationMat = mat4();
-	vec3 r(INITIAL_ROTATION);
-	rotationMat *= RotateX(r[0]);
-	rotationMat *= RotateY(r[1]);
-	rotationMat *= RotateZ(-r[2]);
+	resetRotationMatrix();
 	
 	// Initialize cube positions array to default positions
 	// if positions[3] == 6, this means cube instance #6 is at position #3.
