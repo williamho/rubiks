@@ -41,7 +41,7 @@ void updateCubes();
 void saveState(char *filename);
 void loadState(char *filename);
 bool isSolved();
-bool cubeIsSelected(int cubeNum);
+int maxVecIndex(vec4 v);
 
 // Globals
 extern int winWidth, winHeight;
@@ -52,8 +52,6 @@ extern GLint lineColors[FACES_PER_CUBE];
 extern GLint colors[NUM_CUBES][FACES_PER_CUBE];
 extern int rotationStartTime;
 extern bool finishedRotating;
-extern int selectedCubesIndex;
-extern GLint selectedCubes[MAX_SELECTED_CUBES];
 
 // Positions on the cube that correspond to planes
 const int planes[9][9] = { 

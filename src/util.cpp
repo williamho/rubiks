@@ -81,11 +81,22 @@ bool isSolved() {
 	return true;	
 }
 
-bool cubeIsSelected(int cubeNum) {
-	for (int i=0; i<selectedCubesIndex; i++) {
-		if (selectedCubes[i] == cubeNum)
-			return true;
+#define ABSVAL(x) ((x) > 0 ? (x) : -(x))
+/** Get the direction of a vec4 with the max magnitude */
+int maxVecIndex(vec4 v) {
+	int index = 0;
+	GLfloat max = 0; 
+
+	for (int i=0; i<3; i++) {
+		if (ABSVAL(v[i]) > ABSVAL(max)) {
+			index = i;
+			max = v[i];
+		}
 	}
-	return false;
+	if (max == 0)
+		return 0;
+
+	int dir = max < 0 ? -1 : 1;
+	return dir*(index+1);
 }
 

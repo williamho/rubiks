@@ -14,8 +14,6 @@ GLint lineColors[FACES_PER_CUBE];
 GLint rotationAxes[NUM_CUBES];
 GLint cubeId;
 GLint positions[NUM_CUBES];
-int selectedCubesIndex;
-GLint selectedCubes[MAX_SELECTED_CUBES];
 GLfloat rotationProgress = 1.0;
 bool finishedRotating=true;
 int rotationStartTime;
@@ -114,14 +112,6 @@ void display() {
 		glUniform1i(uRotationAxes,rotationAxes[i]);
 		glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		glDrawElements(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0); 
-
-		if (cubeIsSelected(i)) {
-			glStencilFunc(GL_NOTEQUAL, i+1, 0xFF);
-			glLineWidth(10);
-			glUniform1iv(uColors,FACES_PER_CUBE,lineColors);
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-			glDrawElements(GL_TRIANGLES, VERT_PER_CUBE, GL_UNSIGNED_SHORT, 0); 
-		}
 	}
 
 	glBindVertexArray(0);
@@ -185,16 +175,14 @@ void mouseButton(int button, int state, int x, int y) {
 	if(button == GLUT_LEFT_BUTTON) {
 		switch(state) {
 		case GLUT_DOWN:
-			leftMousePressed = true;
 			mousePosPrev = vec2(x,y);
 			break;
 		case GLUT_UP:
-			leftMousePressed = false;
-			if (selectedCubesIndex == MAX_SELECTED_CUBES) {
-			// TODO: rotate based on three clicked cubes
+			vec4 mouseDiff(x-mousePosPrev[0], y-mousePosPrev[1], 0.0, 1.0);
+			vec4 motion = rotationMat * mouseDiff;
+			std::cout << maxVecIndex(motion) << std::endl;
+
 			//rotateSlice(positions,index/3,index%3,false);
-			}
-			selectedCubesIndex = 0;
 			break;
 		}
 	}
@@ -223,14 +211,6 @@ void mouseButton(int button, int state, int x, int y) {
 void mouseMotion(int x, int y) {
 	vec2 mousePos = vec2(x,y);
 	GLuint index;
-	if (leftMousePressed) {
-		glReadPixels(x, winHeight-y-1, 1, 1, GL_STENCIL_INDEX, GL_UNSIGNED_INT, &index);
-		index--;
-		if (selectedCubesIndex == 0 || 
-		    (selectedCubes[selectedCubesIndex-1] != index && 
-			 selectedCubesIndex < MAX_SELECTED_CUBES))
-			selectedCubes[selectedCubesIndex++] = index;
-	}
 
 	// If right mouse pressed, changes in mouse position will rotate scene
 	if (rightMousePressed) {

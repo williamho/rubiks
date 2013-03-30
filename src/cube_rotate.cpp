@@ -91,8 +91,3 @@ void randomRotations(int numRotations) {
 	} 
 }
 
-int findPlane(int cubes[MAX_SELECTED_CUBES]) {
-
-}
-
-
